@@ -1,14 +1,14 @@
 package com.minis.beans.factory.config;
 
-public class ArgumentValue {
+public class ConstructorArgumentValue {
     private String type;
     private Object value;
     private String name;
-    public ArgumentValue(Object value, String type) {
+    public ConstructorArgumentValue(Object value, String type) {
         this.type = type;
         this.value = value;
     }
-    public ArgumentValue(String type, Object value, String name) {
+    public ConstructorArgumentValue(String type, Object value, String name) {
         this.type = type;
         this.value = value;
         this.name = name;

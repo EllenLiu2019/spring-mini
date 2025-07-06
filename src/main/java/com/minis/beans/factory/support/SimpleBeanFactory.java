@@ -68,24 +68,24 @@ public class SimpleBeanFactory extends DefaultSingletonBeanRegistry implements B
         Object obj;
         Constructor<?> con;
         clz = Class.forName(bd.getClassName());
-        ArgumentValues argumentValues = bd.getConstructorArgumentValues();
-        if (!argumentValues.isEmpty()) {
-            Class[] paramTypes = new Class[argumentValues.getArgumentCount()];
-            Object[] paramValues = new Object[argumentValues.getArgumentCount()];
-            for (int i = 0; i < argumentValues.getArgumentCount(); i++) {
-                ArgumentValue argumentValue = argumentValues.getIndexedArgumentValue(i);
-                if ("String".equals(argumentValue.getType()) || "java.lang.String".equals(argumentValue.getType())) {
+        ConstructorArgumentValues conArgValues = bd.getConstructorArgumentValues();
+        if (!conArgValues.isEmpty()) {
+            Class[] paramTypes = new Class[conArgValues.getArgumentCount()];
+            Object[] paramValues = new Object[conArgValues.getArgumentCount()];
+            for (int i = 0; i < conArgValues.getArgumentCount(); i++) {
+                ConstructorArgumentValue conArgValue = conArgValues.getIndexedArgumentValue(i);
+                if ("String".equals(conArgValue.getType()) || "java.lang.String".equals(conArgValue.getType())) {
                     paramTypes[i] = String.class;
-                    paramValues[i] = argumentValue.getValue();
-                } else if ("Integer".equals(argumentValue.getType()) || "java.lang.Integer".equals(argumentValue.getType())) {
+                    paramValues[i] = conArgValue.getValue();
+                } else if ("Integer".equals(conArgValue.getType()) || "java.lang.Integer".equals(conArgValue.getType())) {
                     paramTypes[i] = Integer.class;
-                    paramValues[i] = Integer.valueOf((String) argumentValue.getValue());
-                } else if ("int".equals(argumentValue.getType())) {
+                    paramValues[i] = Integer.valueOf((String) conArgValue.getValue());
+                } else if ("int".equals(conArgValue.getType())) {
                     paramTypes[i] = int.class;
-                    paramValues[i] = Integer.valueOf((String) argumentValue.getValue());
+                    paramValues[i] = Integer.valueOf((String) conArgValue.getValue());
                 } else {
                     paramTypes[i] = String.class;
-                    paramValues[i] = argumentValue.getValue();
+                    paramValues[i] = conArgValue.getValue();
                 }
             }
             con = clz.getConstructor(paramTypes);

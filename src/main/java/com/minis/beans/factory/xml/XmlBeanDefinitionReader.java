@@ -23,12 +23,12 @@ public class XmlBeanDefinitionReader {
 
             //TODO: 构造函数参数
             List<Element> argsElems = element.elements("constructor-arg");
-            ArgumentValues args = new ArgumentValues();
+            ConstructorArgumentValues args = new ConstructorArgumentValues();
             for (Element argsElem : argsElems) {
                 String argType = argsElem.attributeValue("type");
                 String argValue = argsElem.attributeValue("value");
                 String argName = argsElem.attributeValue("name");
-                args.addArgumentValue(new ArgumentValue(argType, argValue, argName));
+                args.addArgumentValue(new ConstructorArgumentValue(argType, argValue, argName));
             }
             beanDefinition.setConstructorArgumentValues(args);
 

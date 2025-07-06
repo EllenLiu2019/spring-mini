@@ -12,7 +12,7 @@ public class BeanDefinition {
 
     private boolean lazyInit = false;
     private String[] dependsOn;
-    private ArgumentValues constructorArgumentValues;
+    private ConstructorArgumentValues constructorArgumentValues;
     private PropertyValues propertyValues;
     private String initMethodName;
     private volatile Object beanClass;
@@ -63,11 +63,11 @@ public class BeanDefinition {
         this.propertyValues = pvs;
     }
 
-    public void setConstructorArgumentValues(ArgumentValues args) {
+    public void setConstructorArgumentValues(ConstructorArgumentValues args) {
         this.constructorArgumentValues = args;
     }
 
-    public ArgumentValues getConstructorArgumentValues() {
+    public ConstructorArgumentValues getConstructorArgumentValues() {
         return this.constructorArgumentValues;
     }
 
