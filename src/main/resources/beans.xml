@@ -13,7 +13,7 @@
     </bean>
 
     <bean id="baseservice" class="com.minis.test.BaseService">
-        <property type="com.minis.test.BaseBaseService" name="bbs" ref="basebaseservice" />
+        <!--<property type="com.minis.test.BaseBaseService" name="bbs" ref="basebaseservice" />-->
     </bean>
 
 </beans>

@@ -1,7 +1,7 @@
 package com.minis.beans.factory.xml;
 
 import com.minis.beans.factory.config.*;
-import com.minis.beans.factory.support.SimpleBeanFactory;
+import com.minis.beans.factory.support.AbstractBeanFactory;
 import com.minis.core.Resource;
 import org.dom4j.Element;
 
@@ -10,9 +10,9 @@ import java.util.List;
 
 
 public class XmlBeanDefinitionReader {
-    private SimpleBeanFactory simpleBeanFactory;
-    public XmlBeanDefinitionReader(SimpleBeanFactory simpleBeanFactory) {
-        this.simpleBeanFactory = simpleBeanFactory;
+    private AbstractBeanFactory abstractBeanFactory;
+    public XmlBeanDefinitionReader(AbstractBeanFactory abstractBeanFactory) {
+        this.abstractBeanFactory = abstractBeanFactory;
     }
     public void loadBeanDefinitions(Resource resource) {
         while (resource.hasNext()) {
@@ -53,7 +53,7 @@ public class XmlBeanDefinitionReader {
             String[] refArray = refs.toArray(new String[0]);
             beanDefinition.setDependsOn(refArray);
 
-            this.simpleBeanFactory.registerBeanDefinition(beanId, beanDefinition);
+            this.abstractBeanFactory.registerBeanDefinition(beanId, beanDefinition);
         }
     }
 

@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class SimpleBeanFactory extends DefaultSingletonBeanRegistry implements BeanFactory, BeanDefinitionRegistry {
+public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry implements BeanFactory, BeanDefinitionRegistry {
     private final Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<>();
     private final List<String> beanDefinitionNames = new ArrayList<>();
     private final Map<String, Object> earlySingletonObjects = new HashMap<>(16);
@@ -25,12 +25,17 @@ public class SimpleBeanFactory extends DefaultSingletonBeanRegistry implements B
             if (singleton == null) {
                 BeanDefinition beanDefinition = this.beanDefinitionMap.get(beanName);
                 singleton = creatBean(beanDefinition);
-                this.registerSingleton(beanName, singleton);
+                this.registerBean(beanName, singleton);
                 // TODO: 预留 bean postprocessor 位置
                 //   step 1: postProcessBeforeInitialization
+                applyBeanPostProcessorBeforeInitialization(singleton, beanName);
                 //   step 2: afterPropertiesSet
-                //   step 3: init-method
-                //   step 4: postProcessAfterInitialization
+                // TODO:  step 3: init-method
+                /*if (beanDefinition.getInitMethodName() != null && !beanDefinition.equals("")) {
+                    invokeInitMethod(beanDefinition, singleton);
+                }*/
+                // TODO:  step 4: postProcessAfterInitialization
+                //applyBeanPostProcessorAfterInitialization(singleton, beanName);
             }
         }
         return singleton;
@@ -55,8 +60,8 @@ public class SimpleBeanFactory extends DefaultSingletonBeanRegistry implements B
 
             clz = Class.forName(beanDefinition.getClassName());
 
-            handleProperties(beanDefinition, clz, obj);
-        } catch (ReflectiveOperationException | BeansException e) {
+            populateBean(beanDefinition, clz, obj);
+        } catch (ReflectiveOperationException e) {
             throw new RuntimeException(e);
         }
         return obj;
@@ -100,7 +105,11 @@ public class SimpleBeanFactory extends DefaultSingletonBeanRegistry implements B
     }
 
     //TODO: handle property values
-    private void handleProperties(BeanDefinition beanDefinition, Class<?> clz, Object obj) throws ReflectiveOperationException, BeansException {
+    private void populateBean(BeanDefinition beanDefinition, Class<?> clz, Object obj) {
+        handleProperties(beanDefinition, clz, obj);
+    }
+
+    private void handleProperties(BeanDefinition beanDefinition, Class<?> clz, Object obj) {
         System.out.println("handle properties for bean : " + beanDefinition.getId());
 
         PropertyValues propertyValues = beanDefinition.getPropertyValues();
@@ -111,28 +120,32 @@ public class SimpleBeanFactory extends DefaultSingletonBeanRegistry implements B
                 boolean isRef = pv.getIsRef();
                 Class<?>[] paramTypes = new Class<?>[1];
                 Object[] paramValues = new Object[1];
-
                 String pType = pv.getType();
-                if (!isRef) {
-                    if ("String".equals(pType) || "java.lang.String".equals(pType)) {
-                        paramTypes[0] = String.class;
-                    } else if ("Integer".equals(pType) || "java.lang.Integer".equals(pType)) {
-                        paramTypes[0] = Integer.class;
-                    } else if ("int".equals(pType)) {
-                        paramTypes[0] = int.class;
+
+                try {
+                    if (!isRef) {
+                        if ("String".equals(pType) || "java.lang.String".equals(pType)) {
+                            paramTypes[0] = String.class;
+                        } else if ("Integer".equals(pType) || "java.lang.Integer".equals(pType)) {
+                            paramTypes[0] = Integer.class;
+                        } else if ("int".equals(pType)) {
+                            paramTypes[0] = int.class;
+                        } else {
+                            paramTypes[0] = String.class;
+                        }
+                        paramValues[0] = pv.getValue();
                     } else {
-                        paramTypes[0] = String.class;
+                        paramTypes[0] = Class.forName(pType);
+                        paramValues[0] = getBean((String) pv.getValue());
                     }
-                    paramValues[0] = pv.getValue();
-                } else {
-                    paramTypes[0] = Class.forName(pType);
-                    paramValues[0] = getBean((String) pv.getValue());
+
+                    String methodName = "set" + pv.getName().substring(0, 1).toUpperCase() + pv.getName().substring(1);
+                    Method method = clz.getMethod(methodName, paramTypes);
+
+                    method.invoke(obj, paramValues);
+                } catch (ReflectiveOperationException | BeansException e) {
+                    throw new RuntimeException(e);
                 }
-
-                String methodName = "set" + pv.getName().substring(0, 1).toUpperCase() + pv.getName().substring(1);
-                Method method = clz.getMethod(methodName, paramTypes);
-
-                method.invoke(obj, paramValues);
             }
         }
     }
@@ -186,6 +199,7 @@ public class SimpleBeanFactory extends DefaultSingletonBeanRegistry implements B
     public boolean containsBeanDefinition(String name) {
         return this.beanDefinitionMap.containsKey(name);
     }
-
+    public abstract Object applyBeanPostProcessorBeforeInitialization(Object existingBean, String beanName) throws BeansException, ReflectiveOperationException;
+    //public abstract Object applyBeanPostProcessorAfterInitialization(Object existingBean, String beanName) throws BeansException;
 
 }

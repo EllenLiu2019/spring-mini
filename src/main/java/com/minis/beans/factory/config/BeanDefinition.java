@@ -14,6 +14,11 @@ public class BeanDefinition {
     private String[] dependsOn;
     private ConstructorArgumentValues constructorArgumentValues;
     private PropertyValues propertyValues;
+
+    public String getInitMethodName() {
+        return initMethodName;
+    }
+
     private String initMethodName;
     private volatile Object beanClass;
     private String id;

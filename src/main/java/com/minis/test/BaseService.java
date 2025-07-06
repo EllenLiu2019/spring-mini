@@ -1,8 +1,14 @@
 package com.minis.test;
 
+import com.minis.beans.factory.annotation.Autowired;
 import lombok.Data;
 
 @Data
 public class BaseService {
-    private BaseBaseService bbs;
+    @Autowired
+    private BaseBaseService basebaseservice;
+    public void sayHello() {
+        System.out.println("Base Service says hello");
+        basebaseservice.sayHello();
+    }
 }
