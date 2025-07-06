@@ -58,4 +58,20 @@ public class BeanDefinition {
     public Class<?> getBeanClass() {
         return (Class<?>) this.beanClass;
     }
+
+    public void setPropertyValues(PropertyValues pvs) {
+        this.propertyValues = pvs;
+    }
+
+    public void setConstructorArgumentValues(ArgumentValues args) {
+        this.constructorArgumentValues = args;
+    }
+
+    public ArgumentValues getConstructorArgumentValues() {
+        return this.constructorArgumentValues;
+    }
+
+    public PropertyValues getPropertyValues() {
+        return this.propertyValues;
+    }
 }
