@@ -7,9 +7,12 @@ import com.minis.beans.factory.xml.XmlBeanDefinitionReader;
 import com.minis.core.ClassPathXmlResource;
 
 public class ClassPathXmlApplicationContext implements BeanFactory, ApplicationEventPublisher {
-    private BeanFactory beanFactory;
-
+    private SimpleBeanFactory beanFactory;
     public ClassPathXmlApplicationContext(String fileName) {
+        this(fileName, true);
+    }
+
+    public ClassPathXmlApplicationContext(String fileName, boolean isRefresh) {
         //TODO: 将xml文件中的内容读入内存，解析成BeanDefinition，
         // 并将BeanDefinition注册到beanFactory中
         SimpleBeanFactory beanFactory = new SimpleBeanFactory();
@@ -17,6 +20,9 @@ public class ClassPathXmlApplicationContext implements BeanFactory, ApplicationE
         reader.loadBeanDefinitions(new ClassPathXmlResource(fileName));
         //TODO: 将BeanFactory的实例保存为当前类的成员变量以供后续使用（getBean()）
         this.beanFactory = beanFactory;
+        if (isRefresh) {
+            this.beanFactory.refresh();
+        }
     }
     @Override
     public Object getBean(String beanName) throws BeansException, ReflectiveOperationException {

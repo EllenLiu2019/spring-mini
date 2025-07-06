@@ -74,4 +74,8 @@ public class BeanDefinition {
     public PropertyValues getPropertyValues() {
         return this.propertyValues;
     }
+
+    public void setDependsOn(String[] refArray) {
+        this.dependsOn = refArray;
+    }
 }

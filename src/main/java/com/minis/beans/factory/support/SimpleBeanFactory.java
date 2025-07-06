@@ -7,70 +7,113 @@ import com.minis.beans.factory.config.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class SimpleBeanFactory extends DefaultSingletonBeanRegistry implements BeanFactory, BeanDefinitionRegistry {
-    private Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<>();
-    private List<String> beanDefinitionNames = new ArrayList<>();
+    private final Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<>();
+    private final List<String> beanDefinitionNames = new ArrayList<>();
+    private final Map<String, Object> earlySingletonObjects = new HashMap<>(16);
 
     @Override
     public Object getBean(String beanName) throws BeansException, ReflectiveOperationException {
-        Object singleton = this.singletons.get(beanName);
+        Object singleton = this.getSingleton(beanName);
         if (singleton == null) {
-            BeanDefinition beanDefinition = this.beanDefinitionMap.get(beanName);
-            if (beanDefinition == null) {
-                throw new BeansException("No bean named '" + beanName + "' is defined");
+            singleton = this.earlySingletonObjects.get(beanName);
+            if (singleton == null) {
+                BeanDefinition beanDefinition = this.beanDefinitionMap.get(beanName);
+                singleton = creatBean(beanDefinition);
+                this.registerSingleton(beanName, singleton);
+                // TODO: 预留 bean postprocessor 位置
+                //   step 1: postProcessBeforeInitialization
+                //   step 2: afterPropertiesSet
+                //   step 3: init-method
+                //   step 4: postProcessAfterInitialization
             }
-            singleton = creatBean(beanDefinition);
-            this.registerSingleton(beanName, singleton);
         }
         return singleton;
+    }
+
+    public void refresh() {
+        for (String beanName : beanDefinitionNames) {
+            try {
+                getBean(beanName);
+            } catch (ReflectiveOperationException | BeansException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     private Object creatBean(BeanDefinition beanDefinition) {
         Class<?> clz;
         Object obj;
-        Constructor<?> con;
         try {
+            obj = doCreateBean(beanDefinition);
+            this.earlySingletonObjects.put(beanDefinition.getId(), obj);
+
             clz = Class.forName(beanDefinition.getClassName());
 
-            //TODO: handle constructor arguments
-            ArgumentValues argumentValues = beanDefinition.getConstructorArgumentValues();
-            if (!argumentValues.isEmpty()) {
-                Class[] paramTypes = new Class[argumentValues.getArgumentCount()];
-                Object[] paramValues = new Object[argumentValues.getArgumentCount()];
-                for (int i = 0; i < argumentValues.getArgumentCount(); i++) {
-                    ArgumentValue argumentValue = argumentValues.getIndexedArgumentValue(i);
-                    if ("String".equals(argumentValue.getType()) || "java.lang.String".equals(argumentValue.getType())) {
-                        paramTypes[i] = String.class;
-                        paramValues[i] = argumentValue.getValue();
-                    } else if ("Integer".equals(argumentValue.getType()) || "java.lang.Integer".equals(argumentValue.getType())) {
-                        paramTypes[i] = Integer.class;
-                        paramValues[i] = Integer.valueOf((String) argumentValue.getValue());
-                    } else if ("int".equals(argumentValue.getType())) {
-                        paramTypes[i] = int.class;
-                        paramValues[i] = Integer.valueOf((String) argumentValue.getValue());
-                    } else {
-                        paramTypes[i] = String.class;
-                        paramValues[i] = argumentValue.getValue();
-                    }
+            handleProperties(beanDefinition, clz, obj);
+        } catch (ReflectiveOperationException | BeansException e) {
+            throw new RuntimeException(e);
+        }
+        return obj;
+    }
+
+    //TODO: handle constructor arguments
+    private Object doCreateBean(BeanDefinition bd) throws ReflectiveOperationException {
+        Class<?> clz = null;
+        Object obj;
+        Constructor<?> con;
+        clz = Class.forName(bd.getClassName());
+        ArgumentValues argumentValues = bd.getConstructorArgumentValues();
+        if (!argumentValues.isEmpty()) {
+            Class[] paramTypes = new Class[argumentValues.getArgumentCount()];
+            Object[] paramValues = new Object[argumentValues.getArgumentCount()];
+            for (int i = 0; i < argumentValues.getArgumentCount(); i++) {
+                ArgumentValue argumentValue = argumentValues.getIndexedArgumentValue(i);
+                if ("String".equals(argumentValue.getType()) || "java.lang.String".equals(argumentValue.getType())) {
+                    paramTypes[i] = String.class;
+                    paramValues[i] = argumentValue.getValue();
+                } else if ("Integer".equals(argumentValue.getType()) || "java.lang.Integer".equals(argumentValue.getType())) {
+                    paramTypes[i] = Integer.class;
+                    paramValues[i] = Integer.valueOf((String) argumentValue.getValue());
+                } else if ("int".equals(argumentValue.getType())) {
+                    paramTypes[i] = int.class;
+                    paramValues[i] = Integer.valueOf((String) argumentValue.getValue());
+                } else {
+                    paramTypes[i] = String.class;
+                    paramValues[i] = argumentValue.getValue();
                 }
-                con = clz.getConstructor(paramTypes);
-                obj = con.newInstance(paramValues);
-            } else {
-                obj = clz.getConstructor().newInstance();
             }
+            con = clz.getConstructor(paramTypes);
+            obj = con.newInstance(paramValues);
+        } else {
+            obj = clz.getConstructor().newInstance();
+        }
 
-            //TODO: handle property values
-            PropertyValues propertyValues = beanDefinition.getPropertyValues();
-            if (!propertyValues.isEmpty()) {
-                for (int i = 0; i < propertyValues.size(); i++) {
-                    PropertyValue pv = propertyValues.getPropertyValueList().get(i);
+        System.out.println(bd.getId() + " bean created. " + bd.getClassName() + " : " + obj);
 
-                    String pType = pv.getType();
-                    Class<?>[] paramTypes = new Class<?>[1];
+        return obj;
+    }
+
+    //TODO: handle property values
+    private void handleProperties(BeanDefinition beanDefinition, Class<?> clz, Object obj) throws ReflectiveOperationException, BeansException {
+        System.out.println("handle properties for bean : " + beanDefinition.getId());
+
+        PropertyValues propertyValues = beanDefinition.getPropertyValues();
+        if (!propertyValues.isEmpty()) {
+            for (int i = 0; i < propertyValues.size(); i++) {
+                PropertyValue pv = propertyValues.getPropertyValueList().get(i);
+
+                boolean isRef = pv.getIsRef();
+                Class<?>[] paramTypes = new Class<?>[1];
+                Object[] paramValues = new Object[1];
+
+                String pType = pv.getType();
+                if (!isRef) {
                     if ("String".equals(pType) || "java.lang.String".equals(pType)) {
                         paramTypes[0] = String.class;
                     } else if ("Integer".equals(pType) || "java.lang.Integer".equals(pType)) {
@@ -80,20 +123,18 @@ public class SimpleBeanFactory extends DefaultSingletonBeanRegistry implements B
                     } else {
                         paramTypes[0] = String.class;
                     }
-
-                    Object[] paramValues = new Object[1];
                     paramValues[0] = pv.getValue();
-
-                    String methodName = "set" + pv.getName().substring(0, 1).toUpperCase() + pv.getName().substring(1);
-                    Method method = clz.getMethod(methodName, paramTypes);
-
-                    method.invoke(obj, paramValues);
+                } else {
+                    paramTypes[0] = Class.forName(pType);
+                    paramValues[0] = getBean((String) pv.getValue());
                 }
+
+                String methodName = "set" + pv.getName().substring(0, 1).toUpperCase() + pv.getName().substring(1);
+                Method method = clz.getMethod(methodName, paramTypes);
+
+                method.invoke(obj, paramValues);
             }
-        } catch (ReflectiveOperationException e) {
-            throw new RuntimeException(e);
         }
-        return obj;
     }
 
     // TODO: why need this method? BeanFactory holds BeanDefinition,
@@ -114,10 +155,12 @@ public class SimpleBeanFactory extends DefaultSingletonBeanRegistry implements B
     public boolean isSingleton(String name) {
         return this.beanDefinitionMap.get(name).isSingleton();
     }
+
     @Override
     public boolean isPrototype(String name) {
         return this.beanDefinitionMap.get(name).isPrototype();
     }
+
     @Override
     public Class<?> getType(String beanName) {
         return this.beanDefinitionMap.get(beanName).getBeanClass();
@@ -127,16 +170,8 @@ public class SimpleBeanFactory extends DefaultSingletonBeanRegistry implements B
     public void registerBeanDefinition(String name, BeanDefinition beanDefinition) {
         this.beanDefinitionMap.put(name, beanDefinition);
         this.beanDefinitionNames.add(name);
-        // TODO: 注册单例，非懒加载则直接创建 bean 实例
-        if (!beanDefinition.isLazyInit()) {
-            try {
-                getBean(name);
-            } catch (BeansException | ReflectiveOperationException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        }
     }
+
     @Override
     public void removeBeanDefinition(String name) {
         this.beanDefinitionMap.remove(name);
@@ -147,6 +182,7 @@ public class SimpleBeanFactory extends DefaultSingletonBeanRegistry implements B
     public BeanDefinition getBeanDefinition(String name) {
         return this.beanDefinitionMap.get(name);
     }
+
     public boolean containsBeanDefinition(String name) {
         return this.beanDefinitionMap.containsKey(name);
     }
