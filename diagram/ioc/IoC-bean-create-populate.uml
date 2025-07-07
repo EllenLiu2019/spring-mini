@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>com.minis.beans.factory.support</OriginalElement>
+  <nodes>
+    <node x="202.39945355191276" y="505.6830601092896">com.minis.beans.factory.xml.XmlBeanDefinitionReader</node>
+    <node x="-24.38674863387979" y="383.4639344262295">com.minis.beans.factory.config.BeanDefinition</node>
+    <node x="-278.14316939890716" y="261.2448087431694">com.minis.beans.factory.support.DefaultSingletonBeanRegistry</node>
+    <node x="302.4395245901639" y="210.84153005464478">com.minis.beans.factory.config.ConstructorArgumentValues</node>
+    <node x="53.82324043715829" y="103.96666666666667">com.minis.beans.factory.config.PropertyValues</node>
+    <node x="-415.7923497267759" y="67.5606557377049">com.minis.beans.factory.support.BeanDefinitionRegistry</node>
+    <node x="376.27923497267784" y="118.03278688524594">com.minis.beans.factory.config.ConstructorArgumentValue</node>
+    <node x="470.2136612021859" y="425.4731830601093">com.minis.core.ClassPathXmlResource</node>
+    <node x="-257.80327868852464" y="768.0">com.minis.context.ClassPathXmlApplicationContext</node>
+    <node x="-248.64316939890716" y="172.57868852459018">com.minis.beans.factory.config.SingletonBeanRegistry</node>
+    <node x="526.2136612021859" y="339.72568306010936">com.minis.core.Resource</node>
+    <node x="88.32338797814197" y="4.145273224043763">com.minis.beans.factory.config.PropertyValue</node>
+    <node x="-208.38087431693987" y="505.6830601092896">com.minis.beans.factory.support.SimpleBeanFactory</node>
+    <node x="-581.9715846994536" y="690.7978142076503">com.minis.context.ApplicationEventPublisher</node>
+    <node x="-581.9715846994536" y="224.00014207650275">com.minis.beans.BeanFactory</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="com.minis.context.ClassPathXmlApplicationContext" target="com.minis.core.ClassPathXmlResource" relationship="CREATE">
+      <point x="0.0" y="15.0" />
+      <point x="-98.80327868852464" y="815.5" />
+      <point x="589.7136612021859" y="815.5" />
+      <point x="0.0" y="15.0" />
+    </edge>
+    <edge source="com.minis.beans.factory.support.SimpleBeanFactory" target="com.minis.beans.factory.config.BeanDefinition" relationship="TO_MANY">
+      <point x="97.0" y="-15.0" />
+      <point x="-66.49412568306008" y="15.0" />
+    </edge>
+    <edge source="com.minis.beans.factory.config.PropertyValues" target="com.minis.beans.factory.config.PropertyValue" relationship="CREATE">
+      <point x="45.000147540983676" y="-15.0" />
+      <point x="15.0" y="15.0" />
+    </edge>
+    <edge source="com.minis.beans.factory.config.BeanDefinition" target="com.minis.beans.factory.config.PropertyValues" relationship="TO_ONE">
+      <point x="1.7099890710380805" y="-15.0" />
+      <point x="-81.0" y="15.0" />
+    </edge>
+    <edge source="com.minis.core.ClassPathXmlResource" target="com.minis.core.Resource" relationship="REALIZATION">
+      <point x="0.0" y="-15.0" />
+      <point x="0.0" y="15.0" />
+    </edge>
+    <edge source="com.minis.beans.factory.support.DefaultSingletonBeanRegistry" target="com.minis.beans.factory.config.SingletonBeanRegistry" relationship="REALIZATION">
+      <point x="0.0" y="-15.0" />
+      <point x="0.0" y="15.0" />
+    </edge>
+    <edge source="com.minis.beans.factory.xml.XmlBeanDefinitionReader" target="com.minis.beans.factory.config.ConstructorArgumentValues" relationship="CREATE">
+      <point x="24.250453551912358" y="-15.0" />
+      <point x="355.1499071038251" y="376.08196721311475" />
+      <point x="444.4395245901639" y="376.08196721311475" />
+      <point x="0.0" y="15.0" />
+    </edge>
+    <edge source="com.minis.beans.factory.xml.XmlBeanDefinitionReader" target="com.minis.beans.factory.support.SimpleBeanFactory" relationship="TO_ONE">
+      <point x="-128.5" y="0.0" />
+      <point x="104.5" y="0.0" />
+    </edge>
+    <edge source="com.minis.beans.factory.support.SimpleBeanFactory" target="com.minis.beans.factory.support.DefaultSingletonBeanRegistry" relationship="GENERALIZATION">
+      <point x="15.0" y="-15.0" />
+      <point x="42.262295081967295" y="15.0" />
+    </edge>
+    <edge source="com.minis.context.ClassPathXmlApplicationContext" target="com.minis.beans.factory.support.SimpleBeanFactory" relationship="TO_ONE">
+      <point x="9.922404371584776" y="-15.0" />
+      <point x="15.0" y="15.0" />
+    </edge>
+    <edge source="com.minis.beans.factory.config.BeanDefinition" target="com.minis.beans.factory.config.ConstructorArgumentValues" relationship="TO_ONE">
+      <point x="-23.29001092896192" y="-15.0" />
+      <point x="36.32324043715829" y="-13.354726775956237" />
+      <point x="358.77923497267784" y="-13.354726775956237" />
+      <point x="-85.66028961748606" y="-15.0" />
+    </edge>
+    <edge source="com.minis.beans.factory.xml.XmlBeanDefinitionReader" target="com.minis.beans.factory.config.PropertyValue" relationship="CREATE">
+      <point x="-45.95992896174886" y="-15.0" />
+      <point x="284.9395245901639" y="19.145273224043763" />
+      <point x="84.0" y="0.0" />
+    </edge>
+    <edge source="com.minis.context.ClassPathXmlApplicationContext" target="com.minis.beans.factory.xml.XmlBeanDefinitionReader" relationship="CREATE">
+      <point x="159.0" y="0.0" />
+      <point x="330.89945355191276" y="783.0" />
+      <point x="0.0" y="15.0" />
+    </edge>
+    <edge source="com.minis.context.ClassPathXmlApplicationContext" target="com.minis.context.ApplicationEventPublisher" relationship="REALIZATION">
+      <point x="-159.0" y="0.0" />
+      <point x="-449.9715846994536" y="783.0" />
+      <point x="0.0" y="15.0" />
+    </edge>
+    <edge source="com.minis.beans.factory.xml.XmlBeanDefinitionReader" target="com.minis.beans.factory.config.ConstructorArgumentValue" relationship="CREATE">
+      <point x="128.5" y="0.0" />
+      <point x="782.7136612021859" y="520.6830601092896" />
+      <point x="782.7136612021859" y="133.03278688524594" />
+      <point x="137.5" y="0.0" />
+    </edge>
+    <edge source="com.minis.beans.factory.config.ConstructorArgumentValues" target="com.minis.beans.factory.config.ConstructorArgumentValue" relationship="TO_MANY">
+      <point x="69.33971038251394" y="-15.0" />
+      <point x="0.0" y="15.0" />
+    </edge>
+    <edge source="com.minis.beans.factory.support.SimpleBeanFactory" target="com.minis.beans.BeanFactory" relationship="REALIZATION">
+      <point x="-104.50012568306013" y="-6.010928962041362E-5" />
+      <point x="-347.0" y="520.683" />
+      <point x="-347.0" y="239.0" />
+      <point x="76.99958469945364" y="-1.4207650275466222E-4" />
+    </edge>
+    <edge source="com.minis.context.ClassPathXmlApplicationContext" target="com.minis.beans.factory.support.SimpleBeanFactory" relationship="CREATE">
+      <point x="-5.077595628415224" y="-15.0" />
+      <point x="0.0" y="15.0" />
+    </edge>
+    <edge source="com.minis.beans.factory.support.SimpleBeanFactory" target="com.minis.beans.factory.support.BeanDefinitionRegistry" relationship="REALIZATION">
+      <point x="0.0" y="-15.0" />
+      <point x="-103.88087431693987" y="341.5863387978143" />
+      <point x="-297.7923497267759" y="341.5863387978143" />
+      <point x="0.0" y="15.0" />
+    </edge>
+    <edge source="com.minis.beans.factory.xml.XmlBeanDefinitionReader" target="com.minis.beans.factory.config.PropertyValues" relationship="CREATE">
+      <point x="-82.07606557377079" y="-15.0" />
+      <point x="248.82338797814197" y="125.53278688524594" />
+      <point x="88.5" y="6.566120218579272" />
+    </edge>
+    <edge source="com.minis.beans.factory.config.PropertyValues" target="com.minis.beans.factory.config.PropertyValue" relationship="TO_MANY">
+      <point x="30.000147540983676" y="-15.0" />
+      <point x="0.0" y="15.0" />
+    </edge>
+    <edge source="com.minis.context.ClassPathXmlApplicationContext" target="com.minis.beans.BeanFactory" relationship="REALIZATION">
+      <point x="-20.077595628415224" y="-15.0" />
+      <point x="-118.88087431693987" y="613.1830601092896" />
+      <point x="-504.9715846994536" y="613.1830601092896" />
+      <point x="0.0" y="15.0" />
+    </edge>
+    <edge source="com.minis.beans.factory.xml.XmlBeanDefinitionReader" target="com.minis.beans.factory.config.BeanDefinition" relationship="CREATE">
+      <point x="-107.57621311475447" y="-15.0" />
+      <point x="223.3232404371583" y="398.4639344262295" />
+      <point x="84.0" y="0.0" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Compact" zoom="1.063953488372093" showDependencies="true" x="110.5" y="402.00000000000006" />
+  <SelectedNodes />
+  <Categories />
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>private</VISIBILITY>
+</Diagram>
+
