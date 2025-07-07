@@ -1,9 +1,12 @@
 package com.minis.beans.factory.config;
 
+import com.minis.beans.PropertyValues;
+import com.minis.beans.factory.support.ConfigurableBeanFactory;
+
 public class BeanDefinition {
 
-    static String SCOPE_SINGLETON = "singleton";
-    static String SCOPE_PROTOTYPE = "prototype";
+    static String SCOPE_SINGLETON = ConfigurableBeanFactory.SCOPE_SINGLETON;
+    static String SCOPE_PROTOTYPE = ConfigurableBeanFactory.SCOPE_PROTOTYPE;
     private String scope = SCOPE_SINGLETON;
 
     public boolean isLazyInit() {
@@ -20,7 +23,6 @@ public class BeanDefinition {
     }
 
     private String initMethodName;
-    private volatile Object beanClass;
     private String id;
     private String className;
 
@@ -51,17 +53,6 @@ public class BeanDefinition {
 
     public boolean isPrototype() {
         return SCOPE_PROTOTYPE.equals(this.scope);
-    }
-
-    public boolean hasBeanClass() {
-        return (this.beanClass instanceof Class);
-    }
-
-    public void setBeanClass(Class<?> beanClass) {
-        this.beanClass = beanClass;
-    }
-    public Class<?> getBeanClass() {
-        return (Class<?>) this.beanClass;
     }
 
     public void setPropertyValues(PropertyValues pvs) {

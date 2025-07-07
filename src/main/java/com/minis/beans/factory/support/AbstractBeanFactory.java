@@ -1,7 +1,8 @@
 package com.minis.beans.factory.support;
 
-import com.minis.beans.BeanFactory;
 import com.minis.beans.BeansException;
+import com.minis.beans.PropertyValue;
+import com.minis.beans.PropertyValues;
 import com.minis.beans.factory.config.*;
 
 import java.lang.reflect.Constructor;
@@ -12,9 +13,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry implements BeanFactory, BeanDefinitionRegistry {
-    private final Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<>();
-    private final List<String> beanDefinitionNames = new ArrayList<>();
+public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry implements ConfigurableBeanFactory, BeanDefinitionRegistry {
+    protected final Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<>();
+    protected final List<String> beanDefinitionNames = new ArrayList<>();
     private final Map<String, Object> earlySingletonObjects = new HashMap<>(16);
 
     @Override
@@ -35,7 +36,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
                     invokeInitMethod(beanDefinition, singleton);
                 }*/
                 // TODO:  step 4: postProcessAfterInitialization
-                //applyBeanPostProcessorAfterInitialization(singleton, beanName);
+                applyBeanPostProcessorAfterInitialization(singleton, beanName);
             }
         }
         return singleton;
@@ -176,7 +177,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 
     @Override
     public Class<?> getType(String beanName) {
-        return this.beanDefinitionMap.get(beanName).getBeanClass();
+        return this.beanDefinitionMap.get(beanName).getClass();
     }
 
     @Override
@@ -196,10 +197,11 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
         return this.beanDefinitionMap.get(name);
     }
 
+    @Override
     public boolean containsBeanDefinition(String name) {
         return this.beanDefinitionMap.containsKey(name);
     }
     public abstract Object applyBeanPostProcessorBeforeInitialization(Object existingBean, String beanName) throws BeansException, ReflectiveOperationException;
-    //public abstract Object applyBeanPostProcessorAfterInitialization(Object existingBean, String beanName) throws BeansException;
+    public abstract Object applyBeanPostProcessorAfterInitialization(Object existingBean, String beanName) throws BeansException;
 
 }

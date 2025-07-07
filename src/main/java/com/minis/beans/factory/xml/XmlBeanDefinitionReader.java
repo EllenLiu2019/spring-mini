@@ -1,5 +1,7 @@
 package com.minis.beans.factory.xml;
 
+import com.minis.beans.PropertyValue;
+import com.minis.beans.PropertyValues;
 import com.minis.beans.factory.config.*;
 import com.minis.beans.factory.support.AbstractBeanFactory;
 import com.minis.core.Resource;

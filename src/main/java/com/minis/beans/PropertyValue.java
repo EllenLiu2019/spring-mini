@@ -1,4 +1,4 @@
-package com.minis.beans.factory.config;
+package com.minis.beans;
 
 public class PropertyValue {
     private final String name;

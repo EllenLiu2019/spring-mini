@@ -1,42 +1,36 @@
 package com.minis.context;
 
-import com.minis.beans.BeanFactory;
 import com.minis.beans.BeansException;
 import com.minis.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
-import com.minis.beans.factory.support.AutowireCapableBeanFactory;
+import com.minis.beans.factory.config.BeanFactoryPostProcessor;
+import com.minis.beans.factory.support.ConfigurableListableBeanFactory;
+import com.minis.beans.factory.support.DefaultListableBeanFactory;
 import com.minis.beans.factory.xml.XmlBeanDefinitionReader;
 import com.minis.core.ClassPathXmlResource;
 
-public class ClassPathXmlApplicationContext implements BeanFactory, ApplicationEventPublisher {
-    private AutowireCapableBeanFactory beanFactory;
+import java.util.ArrayList;
+import java.util.List;
 
-    public ClassPathXmlApplicationContext(String fileName) {
-        this(fileName, true);
-    }
+public class ClassPathXmlApplicationContext extends AbstractApplicationContext {
+    private DefaultListableBeanFactory beanFactory;
+    private final List<BeanFactoryPostProcessor> beanFactoryPostProcessors = new ArrayList<>();
 
-    public ClassPathXmlApplicationContext(String fileName, boolean isRefresh) {
+    public ClassPathXmlApplicationContext(String fileName){
         //TODO: 将xml文件中的内容读入内存，解析成BeanDefinition，
         // 并将BeanDefinition注册到beanFactory中
-        AutowireCapableBeanFactory beanFactory = new AutowireCapableBeanFactory();
+        ClassPathXmlResource resource = new ClassPathXmlResource(fileName);
+        DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
         XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);
-        reader.loadBeanDefinitions(new ClassPathXmlResource(fileName));
+        reader.loadBeanDefinitions(resource);
         //TODO: 将BeanFactory的实例保存为当前类的成员变量以供后续使用（getBean()）
         this.beanFactory = beanFactory;
-        if (isRefresh) {
-            this.refresh();
-        }
     }
 
-    private void refresh() {
-        registerBeanPostProcessors();
-        this.onRefresh();
-    }
-
-    private void registerBeanPostProcessors() {
+    public void registerBeanPostProcessors() {
         this.beanFactory.addBeanPostProcessor(new AutowiredAnnotationBeanPostProcessor());
     }
 
-    private void onRefresh() {
+    void onRefresh() {
         this.beanFactory.refresh();
     }
 
@@ -67,11 +61,46 @@ public class ClassPathXmlApplicationContext implements BeanFactory, ApplicationE
 
     @Override
     public void registerBean(String beanName, Object obj) {
+    }
 
+    @Override
+    void registerListeners() {
+        ApplicationListener listener = new ApplicationListener();
+        this.getApplicationEventPublisher().addApplicationListener(listener);
+    }
+
+    @Override
+    void initApplicationEventPublisher() {
+        ApplicationEventPublisher aep = new SimpleApplicationEventPublisher();
+        this.setApplicationEventPublisher(aep);
+    }
+
+    @Override
+    void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
     }
 
     @Override
     public void publishEvent(ApplicationEvent event) {
+        this.getApplicationEventPublisher().publishEvent(event);
+    }
 
+    @Override
+    public void addApplicationListener(ApplicationListener listener) {
+        this.getApplicationEventPublisher().addApplicationListener(listener);
+    }
+
+    @Override
+    public void addBeanFactoryPostProcessor(BeanFactoryPostProcessor postProcessor) {
+        this.beanFactoryPostProcessors.add(postProcessor);
+    }
+
+    @Override
+    public ConfigurableListableBeanFactory getBeanFactory() throws IllegalStateException {
+        return this.beanFactory;
+    }
+
+    @Override
+    void finishRefresh() {
+        publishEvent(new ContextRefreshEvent("Context Refreshed..."));
     }
 }
