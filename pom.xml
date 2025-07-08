@@ -7,6 +7,7 @@
     <groupId>com.ellen</groupId>
     <artifactId>spring-mini</artifactId>
     <version>1.0.0-SNAPSHOT</version>
+    <packaging>war</packaging>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -14,13 +15,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <dom4j.version>2.1.5</dom4j.version>
         <lombok.version>1.18.38</lombok.version>
+        <tomcat.version>11.0.8</tomcat.version>
     </properties>
-
-    <dependencyManagement>
-        <dependencies>
-
-        </dependencies>
-    </dependencyManagement>
 
     <dependencies>
         <dependency>
@@ -33,5 +29,16 @@
             <artifactId>lombok</artifactId>
             <version>${lombok.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-core</artifactId>
+            <version>${tomcat.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-jasper</artifactId>
+            <version>${tomcat.version}</version>
+        </dependency>
+
     </dependencies>
 </project>
