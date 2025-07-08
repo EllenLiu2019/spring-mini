@@ -1,5 +1,7 @@
 package com.minis.web;
 
+import com.minis.beans.BeansException;
+import com.minis.beans.factory.annotation.Autowired;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -8,6 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -16,6 +19,7 @@ import java.net.URL;
 import java.util.*;
 
 public class DispatcherServlet extends HttpServlet {
+    private WebApplicationContext webApplicationContext;
     private List<String> packageNames = new ArrayList<>();
     private Map<String, Object> controllerObjs = new HashMap<>();
     private List<String> controllerNames = new ArrayList<>();
@@ -32,13 +36,15 @@ public class DispatcherServlet extends HttpServlet {
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
+        this.webApplicationContext = (WebApplicationContext) this.getServletContext().
+                getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
 
         this.sContextConfigLocation = config.getInitParameter("contextConfigLocation");
         URL xmlPath = null;
         try {
             xmlPath = this.getServletContext().getResource(this.sContextConfigLocation);
         } catch (MalformedURLException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
         this.packageNames = XmlScanComponentHelper.getNodeValue(xmlPath);
 
@@ -54,13 +60,39 @@ public class DispatcherServlet extends HttpServlet {
     private void initController() {
         this.controllerNames = scanPackages(this.packageNames);
         for (String controllerName : controllerNames) {
-            Class<?> clz = null;
+            Class<?> clz;
             try {
                 clz = Class.forName(controllerName);
                 this.controllerClz.put(controllerName, clz);
                 Object obj = clz.getConstructor().newInstance();
+                populateBean(obj);
                 this.controllerObjs.put(controllerName, obj);
+
             } catch (ReflectiveOperationException ignored) {
+            }
+        }
+    }
+
+    protected void populateBean(Object bean) {
+        Class<?> clazz = bean.getClass();
+        Field[] fields = clazz.getDeclaredFields();
+        for (Field field : fields) {
+            boolean isAutowired = field.isAnnotationPresent(Autowired.class);
+            if (isAutowired) {
+                String fieldName = field.getName();
+                Object autowiredObj;
+                try {
+                    autowiredObj = this.webApplicationContext.getBean(fieldName);
+                } catch (BeansException | ReflectiveOperationException e) {
+                    throw new RuntimeException(e);
+                }
+                try {
+                    field.setAccessible(true);
+                    field.set(bean, autowiredObj);
+                } catch (ReflectiveOperationException e) {
+                    throw new RuntimeException(e);
+                }
+
             }
         }
     }
@@ -96,11 +128,11 @@ public class DispatcherServlet extends HttpServlet {
     }
 
     private void initMapping() {
-        for(String controllerName: this.controllerNames) {
+        for (String controllerName : this.controllerNames) {
             Class<?> aClass = this.controllerClz.get(controllerName);
             Object obj = this.controllerObjs.get(controllerName);
             Method[] methods = aClass.getDeclaredMethods();
-            for(Method method: methods) {
+            for (Method method : methods) {
                 if (method.isAnnotationPresent(RequestMapping.class)) {
                     String urlMapping = method.getAnnotation(RequestMapping.class).value();
                     this.urlMappingNames.add(urlMapping);
