@@ -11,7 +11,7 @@ public class Main {
 
     public static void main(String[] args) throws LifecycleException {
         Tomcat tomcat = new Tomcat();
-        Context context = tomcat.addWebapp("/spring-mvc", new File("src/main/webapp/").getAbsolutePath());
+        Context context = tomcat.addWebapp("/mvc-mini", new File("src/main/webapp/").getAbsolutePath());
         Connector connector = new Connector();
         connector.setPort(8088);
         tomcat.setConnector(connector);

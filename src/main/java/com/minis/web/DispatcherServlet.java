@@ -6,21 +6,29 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class DispatcherServlet extends HttpServlet {
-    private Map<String, MappingValue> mappingValues;
-    private Map<String, Class<?>> mappingClz = new HashMap<>();
-    private Map<String, Object> mappingObjs = new HashMap<>();
+    private List<String> packageNames = new ArrayList<>();
+    private Map<String, Object> controllerObjs = new HashMap<>();
+    private List<String> controllerNames = new ArrayList<>();
+    private Map<String, Class<?>> controllerClz = new HashMap<>();
+    private Map<String, Object> mappingObjs = new HashMap<>(); // TODO: URL 名称与对象的映射关系
+    private Map<String, Method> mappingMethods = new HashMap<>();// TODO: URL 名称与方法的映射关系
     private String sContextConfigLocation;
+    private List<String> urlMappingNames = new ArrayList<>();
+
     public DispatcherServlet() {
         super();
     }
+
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
@@ -32,43 +40,88 @@ public class DispatcherServlet extends HttpServlet {
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
-        Resource rs = new ClassPathXmlResource(xmlPath);
-        XmlConfigReader reader = new XmlConfigReader();
-        mappingValues = reader.loadConfig(rs);
+        this.packageNames = XmlScanComponentHelper.getNodeValue(xmlPath);
+
         Refresh();
     }
 
     //TODO: 对所有的mappingValues中注册的类进行实例化，默认构造函数
     protected void Refresh() {
-        for (Map.Entry<String, MappingValue> entry : mappingValues.entrySet()) {
-            String id = entry.getKey();
-            String className = entry.getValue().getClz();
-            Object obj = null;
+        initController();
+        initMapping();
+    }
+
+    private void initController() {
+        this.controllerNames = scanPackages(this.packageNames);
+        for (String controllerName : controllerNames) {
             Class<?> clz = null;
             try {
-                clz = Class.forName(className);
-                obj = clz.getConstructor().newInstance();
-            } catch (Exception e) {
-                e.printStackTrace();
+                clz = Class.forName(controllerName);
+                this.controllerClz.put(controllerName, clz);
+                Object obj = clz.getConstructor().newInstance();
+                this.controllerObjs.put(controllerName, obj);
+            } catch (ReflectiveOperationException ignored) {
             }
-            mappingClz.put(id, clz);
-            mappingObjs.put(id, obj);
+        }
+    }
+
+    private List<String> scanPackages(List<String> packageNames) {
+        List<String> tempControllerNames = new ArrayList<>();
+        for (String packageName : packageNames) {
+            tempControllerNames.addAll(scanPackage(packageName));
+        }
+        return tempControllerNames;
+    }
+
+    private Collection<String> scanPackage(String packageName) {
+        List<String> result = new ArrayList<>();
+        URI uri;
+        try {
+            uri = this.getClass().getResource("/" + packageName.replaceAll("\\.", "/")).toURI();
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+        File dir = new File(uri);
+        for (File file : Objects.requireNonNull(dir.listFiles())) {
+            if (file.isDirectory()) {
+                scanPackage(packageName + "." + file.getName());
+            } else {
+                if (file.getName().endsWith(".class")) {
+                    String className = packageName + "." + file.getName().replace(".class", "");
+                    result.add(className);
+                }
+            }
+        }
+        return result;
+    }
+
+    private void initMapping() {
+        for(String controllerName: this.controllerNames) {
+            Class<?> aClass = this.controllerClz.get(controllerName);
+            Object obj = this.controllerObjs.get(controllerName);
+            Method[] methods = aClass.getDeclaredMethods();
+            for(Method method: methods) {
+                if (method.isAnnotationPresent(RequestMapping.class)) {
+                    String urlMapping = method.getAnnotation(RequestMapping.class).value();
+                    this.urlMappingNames.add(urlMapping);
+                    this.mappingObjs.put(urlMapping, obj);
+                    this.mappingMethods.put(urlMapping, method);
+                }
+            }
         }
     }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String sPath = request.getServletPath();
-        if (this.mappingValues.get(sPath) == null) {
+        if (!this.urlMappingNames.contains(sPath)) {
             return;
         }
 
-        Class<?> clz = this.mappingClz.get(sPath);
+        Method method = this.mappingMethods.get(sPath);
         Object obj = this.mappingObjs.get(sPath);
-        String methodName = this.mappingValues.get(sPath).getMethod();
         Object objResult = null;
         try {
-            Method method = clz.getMethod(methodName);
             objResult = method.invoke(obj);
         } catch (Exception ignored) {
         }
@@ -78,11 +131,4 @@ public class DispatcherServlet extends HttpServlet {
         response.getWriter().append(objResult.toString());
     }
 
-    /*@Override
-    public void destroy() {
-        this.mappingValues.clear();
-        this.mappingClz.clear();
-        this.mappingObjs.clear();
-        super.destroy();
-    }*/
 }
