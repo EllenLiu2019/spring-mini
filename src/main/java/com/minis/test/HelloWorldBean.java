@@ -1,14 +1,15 @@
 package com.minis.test;
 
-import com.minis.web.RequestMapping;
+import com.minis.web.annotation.RequestMapping;
 
 public class HelloWorldBean {
-    @RequestMapping("/test")
+    @RequestMapping("/get")
     public String doGet() {
-        return "hello world!";
+        return "doGet() says hello world!";
     }
+    @RequestMapping("/post")
     public String doPost() {
-        return "hello world!";
+        return "doPost() says hello world!";
     }
 
 }

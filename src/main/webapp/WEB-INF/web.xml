@@ -12,13 +12,13 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" id="WebApp_ID">
 
     <!-- TODO: 声明监听器，它在建立、修改和删除会话或servlet环境时得到事件通知 -->
     <listener>
-        <listener-class>com.minis.web.ContextLoaderListener</listener-class>
+        <listener-class>com.minis.web.context.ContextLoaderListener</listener-class>
     </listener>
 
     <servlet>
         <servlet-name>minisMVC</servlet-name>
         <!-- TODO: 声明 servlet 类名 -->
-        <servlet-class>com.minis.web.DispatcherServlet</servlet-class>
+        <servlet-class>com.minis.web.servlet.DispatcherServlet</servlet-class>
 
         <!--TODO: init-param 是 servlet 范围有效的参数，在 servlet 类的 init() 方法中通过 servletConfig.getInitParameter(″contextConfigLocation″) 方法获得-->
         <init-param>

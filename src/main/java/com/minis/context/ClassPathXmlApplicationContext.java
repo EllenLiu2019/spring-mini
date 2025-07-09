@@ -30,7 +30,7 @@ public class ClassPathXmlApplicationContext extends AbstractApplicationContext {
         this.beanFactory.addBeanPostProcessor(new AutowiredAnnotationBeanPostProcessor());
     }
 
-    void onRefresh() {
+    public void onRefresh() {
         this.beanFactory.refresh();
     }
 
@@ -40,43 +40,19 @@ public class ClassPathXmlApplicationContext extends AbstractApplicationContext {
     }
 
     @Override
-    public boolean containsBean(String beanName) {
-        return false;
-    }
-
-    @Override
-    public boolean isSingleton(String beanName) {
-        return false;
-    }
-
-    @Override
-    public boolean isPrototype(String beanName) {
-        return false;
-    }
-
-    @Override
-    public Class<?> getType(String beanName) {
-        return null;
-    }
-
-    @Override
-    public void registerBean(String beanName, Object obj) {
-    }
-
-    @Override
-    void registerListeners() {
+    public void registerListeners() {
         ApplicationListener listener = new ApplicationListener();
         this.getApplicationEventPublisher().addApplicationListener(listener);
     }
 
     @Override
-    void initApplicationEventPublisher() {
+    public void initApplicationEventPublisher() {
         ApplicationEventPublisher aep = new SimpleApplicationEventPublisher();
         this.setApplicationEventPublisher(aep);
     }
 
     @Override
-    void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
+    public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
     }
 
     @Override
@@ -100,7 +76,7 @@ public class ClassPathXmlApplicationContext extends AbstractApplicationContext {
     }
 
     @Override
-    void finishRefresh() {
-        publishEvent(new ContextRefreshEvent("Context Refreshed..."));
+    public void finishRefresh() {
+        publishEvent(new ContextRefreshEvent("Ioc Context Refreshed..."));
     }
 }

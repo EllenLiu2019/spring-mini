@@ -1,11 +1,11 @@
-package com.minis.web;
+package com.minis.web.context;
 
 import com.minis.context.ApplicationContext;
 import jakarta.servlet.ServletContext;
 
 
 public interface WebApplicationContext extends ApplicationContext {
-    String ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE = WebApplicationContext.class.getName();
+    String ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE = WebApplicationContext.class.getName() + ".ROOT";
     void setServletContext(ServletContext servletContext);
     ServletContext getServletContext();
 }

@@ -1,5 +1,6 @@
-package com.minis.web;
+package com.minis.web.context;
 
+import com.minis.web.context.support.XmlWebApplicationContext;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
@@ -19,7 +20,7 @@ public class ContextLoaderListener implements ServletContextListener {
 
     private void initWebApplicationContext(ServletContext servletContext) {
         String contextLocation = servletContext.getInitParameter(CONFIG_LOCATION_PARAM);
-        WebApplicationContext webAppContext = new AnnotationConfigWebApplicationContext(contextLocation);
+        WebApplicationContext webAppContext = new XmlWebApplicationContext(contextLocation);
         webAppContext.setServletContext(servletContext);
         this.context = webAppContext;
         servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, this.context);

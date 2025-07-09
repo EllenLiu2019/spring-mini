@@ -6,9 +6,9 @@ import lombok.Data;
 @Data
 public class BaseService {
     @Autowired
-    private BaseBaseService basebaseservice;
+    private BaseBaseService baseBaseService;
     public void sayHello() {
         System.out.println("Base Service says hello");
-        basebaseservice.sayHello();
+        baseBaseService.sayHello();
     }
 }

@@ -26,7 +26,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
             if (singleton == null) {
                 BeanDefinition beanDefinition = this.beanDefinitionMap.get(beanName);
                 singleton = creatBean(beanDefinition);
-                this.registerBean(beanName, singleton);
+                this.registerSingleton(beanName, singleton);
                 // TODO: 预留 bean postprocessor 位置
                 //   step 1: postProcessBeforeInitialization
                 applyBeanPostProcessorBeforeInitialization(singleton, beanName);
@@ -70,12 +70,13 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 
     //TODO: handle constructor arguments
     private Object doCreateBean(BeanDefinition bd) throws ReflectiveOperationException {
+        System.out.println("doCreateBean for: " + bd.getClassName());
         Class<?> clz = null;
         Object obj;
         Constructor<?> con;
         clz = Class.forName(bd.getClassName());
         ConstructorArgumentValues conArgValues = bd.getConstructorArgumentValues();
-        if (!conArgValues.isEmpty()) {
+        if (conArgValues != null && !conArgValues.isEmpty()) {
             Class[] paramTypes = new Class[conArgValues.getArgumentCount()];
             Object[] paramValues = new Object[conArgValues.getArgumentCount()];
             for (int i = 0; i < conArgValues.getArgumentCount(); i++) {
@@ -114,7 +115,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
         System.out.println("handle properties for bean : " + beanDefinition.getId());
 
         PropertyValues propertyValues = beanDefinition.getPropertyValues();
-        if (!propertyValues.isEmpty()) {
+        if (propertyValues != null && !propertyValues.isEmpty()) {
             for (int i = 0; i < propertyValues.size(); i++) {
                 PropertyValue pv = propertyValues.getPropertyValueList().get(i);
 
@@ -152,13 +153,6 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
     }
 
     // TODO: why need this method? BeanFactory holds BeanDefinition,
-    //   SingletonBeanRegistry holds singleton object
-    @Override
-    public void registerBean(String beanName, Object obj) {
-        this.registerSingleton(beanName, obj);
-    }
-
-    // TODO: why need this method? BeanFactory holds BeanDefinition,
     //  SingletonBeanRegistry holds singleton object
     @Override
     public boolean containsBean(String beanName) {
@@ -177,7 +171,11 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 
     @Override
     public Class<?> getType(String beanName) {
-        return this.beanDefinitionMap.get(beanName).getClass();
+        try {
+            return Class.forName(this.beanDefinitionMap.get(beanName).getClassName());
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

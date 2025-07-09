@@ -1,8 +1,10 @@
 package com.minis.test;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 public class AServiceImpl implements AService {
 
     private String name;
