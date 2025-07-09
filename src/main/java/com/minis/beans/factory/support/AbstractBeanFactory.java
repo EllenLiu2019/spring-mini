@@ -20,6 +20,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 
     @Override
     public Object getBean(String beanName) throws BeansException, ReflectiveOperationException {
+        System.out.println("creating bean: " + beanName);
         Object singleton = this.getSingleton(beanName);
         if (singleton == null) {
             singleton = this.earlySingletonObjects.get(beanName);

@@ -74,7 +74,8 @@ public class AnnotationConfigWebApplicationContext extends AbstractApplicationCo
         File dir = new File(uri);
         for (File file : Objects.requireNonNull(dir.listFiles())) {
             if (file.isDirectory()) {
-                scanPackage(packageName + "." + file.getName());
+                Collection<String> classNames = scanPackage(packageName + "." + file.getName());
+                instantiableClassNames.addAll(classNames);
             } else {
                 if (file.getName().endsWith(".class")) {
                     String className = packageName + "." + file.getName().replace(".class", "");

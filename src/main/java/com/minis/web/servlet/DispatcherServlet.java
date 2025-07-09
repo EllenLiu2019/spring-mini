@@ -1,5 +1,6 @@
 package com.minis.web.servlet;
 
+import com.minis.beans.BeansException;
 import com.minis.web.context.WebApplicationContext;
 import com.minis.web.context.support.AnnotationConfigWebApplicationContext;
 import jakarta.servlet.ServletConfig;
@@ -15,7 +16,6 @@ public class DispatcherServlet extends HttpServlet {
     private WebApplicationContext parentWebApplicationContext;// TODO: listener start up first, so it's parent
     private HandlerMapping handlerMapping;
     private HandlerAdapter handlerAdapter;
-    private String sContextConfigLocation;
     public DispatcherServlet() {
         super();
         System.out.println("DispatcherServlet init");
@@ -28,24 +28,32 @@ public class DispatcherServlet extends HttpServlet {
 
         // TODO: build up controller context,
         //  controller context 持有对 listener 创建的 parent(ioc) XmlWebApplicationContext 的单向引用
-        sContextConfigLocation = config.getInitParameter("contextConfigLocation");
+        String sContextConfigLocation = config.getInitParameter("contextConfigLocation");
         webApplicationContext = new AnnotationConfigWebApplicationContext(sContextConfigLocation, parentWebApplicationContext);
-        this.initHandler();
+        try {
+            this.initHandler();
+        } catch (ReflectiveOperationException | BeansException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    private void initHandler() {
+    private void initHandler() throws ReflectiveOperationException, BeansException {
         //TODO: 注册 url->bean->method
         handlerMapping = new RequestMappingHandlerMapping(webApplicationContext);
-        handlerAdapter = new RequestMappingHandlerAdapter();
+        handlerAdapter = new RequestMappingHandlerAdapter(webApplicationContext);
     }
 
     @Override
     public void service(HttpServletRequest req, HttpServletResponse res) {
         req.setAttribute(WEB_APPLICATION_CONTEXT_ATTRIBUTE, this.webApplicationContext);
-        doDispatch(req, res);
+        try {
+            doDispatch(req, res);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    private void doDispatch(HttpServletRequest req, HttpServletResponse res) {
+    private void doDispatch(HttpServletRequest req, HttpServletResponse res) throws Exception {
         HandlerMethod handler = this.handlerMapping.getHandler(req);
         if (handler == null) {
             return;
