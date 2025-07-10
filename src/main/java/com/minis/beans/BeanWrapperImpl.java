@@ -1,4 +1,4 @@
-package com.minis.web;
+package com.minis.beans;
 
 import com.minis.beans.*;
 

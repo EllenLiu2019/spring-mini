@@ -1,7 +1,7 @@
 package com.minis.web.servlet;
 
 import com.minis.beans.BeansException;
-import com.minis.web.annotation.RequestMapping;
+import com.minis.web.bind.annotation.RequestMapping;
 import com.minis.web.context.WebApplicationContext;
 import jakarta.servlet.http.HttpServletRequest;
 

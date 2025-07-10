@@ -1,26 +1,29 @@
 package com.minis.web.servlet;
 
-import com.minis.beans.BeansException;
-import com.minis.web.WebBindingInitializer;
-import com.minis.web.WebDataBinder;
-import com.minis.web.WebDataBinderFactory;
-import com.minis.web.context.WebApplicationContext;
+import com.minis.context.ApplicationContext;
+import com.minis.context.ApplicationContextAware;
+import com.minis.web.bind.annotation.ResponseBody;
+import com.minis.web.converter.HttpMessageConverter;
+import com.minis.web.bind.support.WebBindingInitializer;
+import com.minis.web.bind.WebDataBinder;
+import com.minis.web.bind.support.WebDataBinderFactory;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.Setter;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RequestMappingHandlerAdapter implements HandlerAdapter {
-    private WebApplicationContext wac;
+public class RequestMappingHandlerAdapter implements HandlerAdapter, ApplicationContextAware {
+    private ApplicationContext webApplicationContext;
+
+    @Setter
     private WebBindingInitializer webBindingInitializer;
 
-    public RequestMappingHandlerAdapter(WebApplicationContext wac) throws ReflectiveOperationException, BeansException {
-        this.wac = wac;
-        this.webBindingInitializer = (WebBindingInitializer) this.wac.getBean("dateInitializer");
-    }
+    @Setter
+    private HttpMessageConverter messageConverter;
 
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -28,6 +31,10 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter {
     }
 
     private void handleInternal(HttpServletRequest request, HttpServletResponse response, HandlerMethod handler) throws Exception {
+        invokeHandlerMethod(request, response, handler);
+    }
+
+    private void invokeHandlerMethod(HttpServletRequest request, HttpServletResponse response, HandlerMethod handler) throws Exception {
         Parameter[] methodParameters = handler.getMethod().getParameters();
 
         List<Object> methodParamObjList = new ArrayList<>();
@@ -46,7 +53,23 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter {
 
         Method invocableMethod = handler.getMethod();
         Object returnObj = invocableMethod.invoke(handler.getBean(), methodParamObjs);
+        Class<?> returnType = invocableMethod.getReturnType();
 
-        response.getWriter().append(returnObj.toString());
+        if (invocableMethod.isAnnotationPresent(ResponseBody.class)) {
+            this.messageConverter.write(returnObj, response);
+        } else if (returnType == void.class) {
+            // ignore
+        } else if (returnType == String.class) {
+            response.getWriter().write((String) returnObj);
+        } else {
+            this.messageConverter.write(returnObj, response);
+        }
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) {
+        // TODO: this is a controller context, so it should be a subclass of AbstractApplicationContext
+        //  and it can obtain parent context, it has the ability to obtain all beans
+        this.webApplicationContext = applicationContext;
     }
 }

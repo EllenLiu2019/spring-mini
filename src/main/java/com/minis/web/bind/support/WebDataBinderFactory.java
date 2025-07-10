@@ -1,5 +1,6 @@
-package com.minis.web;
+package com.minis.web.bind.support;
 
+import com.minis.web.bind.WebDataBinder;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.List;

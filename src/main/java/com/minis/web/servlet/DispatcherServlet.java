@@ -15,6 +15,7 @@ import org.apache.logging.log4j.Logger;
 public class DispatcherServlet extends HttpServlet {
     private static final Logger LOGGER = LogManager.getLogger(DispatcherServlet.class.getName());
     public static final String WEB_APPLICATION_CONTEXT_ATTRIBUTE = DispatcherServlet.class.getName() + ".CONTEXT";
+    private static final String HANDLER_ADAPTER_BEAN_NAME = "handlerAdapter";
     private WebApplicationContext webApplicationContext;
     private WebApplicationContext parentWebApplicationContext;// TODO: listener start up first, so it's parent
     private HandlerMapping handlerMapping;
@@ -48,7 +49,7 @@ public class DispatcherServlet extends HttpServlet {
     private void initHandler() throws ReflectiveOperationException, BeansException {
         //TODO: 注册 url->bean->method
         handlerMapping = new RequestMappingHandlerMapping(webApplicationContext);
-        handlerAdapter = new RequestMappingHandlerAdapter(webApplicationContext);
+        this.handlerAdapter = (HandlerAdapter) webApplicationContext.getBean(HANDLER_ADAPTER_BEAN_NAME);
     }
 
     @Override

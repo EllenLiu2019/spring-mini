@@ -1,13 +1,14 @@
 package com.minis.test.controller;
 
 import com.minis.test.entity.User;
-import com.minis.web.annotation.RequestMapping;
+import com.minis.web.bind.annotation.RequestMapping;
+import com.minis.web.bind.annotation.ResponseBody;
 
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
-public class HelloWorldBean {
+public class HelloWorld {
     @RequestMapping("/get")
     public String doGet(Date date, String name) {
         String formattedDate = DateTimeFormatter
@@ -26,6 +27,14 @@ public class HelloWorldBean {
                         .toInstant()
                         .atZone(ZoneId.systemDefault()));
         return user.getName() + "'s[id=" + user.getId() + "] birthday: " + formattedDate;
+    }
+
+    @RequestMapping("/test4")
+    @ResponseBody
+    public User doTest4(User user) {
+        user.setName(user.getName() + "---");
+        user.setBirthday(new Date());
+        return user;
     }
 
 }

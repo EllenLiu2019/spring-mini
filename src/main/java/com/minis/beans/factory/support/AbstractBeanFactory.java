@@ -27,19 +27,21 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
         if (singleton == null) {
             singleton = this.earlySingletonObjects.get(beanName);
             if (singleton == null) {
+                LOGGER.debug("Creating singleton bean '" + beanName + "'");
                 BeanDefinition beanDefinition = this.beanDefinitionMap.get(beanName);
-                singleton = creatBean(beanDefinition);
-                this.registerSingleton(beanName, singleton);
-                // TODO: 预留 bean postprocessor 位置
-                //   step 1: postProcessBeforeInitialization
-                applyBeanPostProcessorBeforeInitialization(singleton, beanName);
-                //   step 2: afterPropertiesSet
-                // TODO:  step 3: init-method
-                /*if (beanDefinition.getInitMethodName() != null && !beanDefinition.equals("")) {
-                    invokeInitMethod(beanDefinition, singleton);
-                }*/
-                // TODO:  step 4: postProcessAfterInitialization
-                applyBeanPostProcessorAfterInitialization(singleton, beanName);
+                if (beanDefinition != null) {
+                    singleton = creatBean(beanDefinition);
+                    this.registerSingleton(beanName, singleton);
+                    // TODO: step 1: postProcessBeforeInitialization
+                    applyBeanPostProcessorBeforeInitialization(singleton, beanName);
+                    //   step 2: afterPropertiesSet
+                    // TODO:  step 3: init-method
+                    /*if (beanDefinition.getInitMethodName() != null && !beanDefinition.equals("")) {
+                        invokeInitMethod(beanDefinition, singleton);
+                    }*/
+                    // TODO:  step 4: postProcessAfterInitialization
+                    applyBeanPostProcessorAfterInitialization(singleton, beanName);
+                }
             }
         }
         return singleton;
@@ -73,7 +75,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 
     //TODO: handle constructor arguments
     private Object doCreateBean(BeanDefinition bd) throws ReflectiveOperationException {
-        LOGGER.debug("do Create Bean for: id = {}, classname = {}", bd.getId(), bd.getClassName());
+        LOGGER.debug("creating Bean for: id = {}, classname = {}", bd.getId(), bd.getClassName());
         Class<?> clz;
         Object obj;
         Constructor<?> con;
@@ -115,7 +117,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
     }
 
     private void handleProperties(BeanDefinition beanDefinition, Class<?> clz, Object obj) {
-        LOGGER.debug("populate Bean : id = {}, className = {}", beanDefinition.getId(), beanDefinition.getClassName());
+        LOGGER.debug("populating Bean : id = {}, className = {}", beanDefinition.getId(), beanDefinition.getClassName());
 
         PropertyValues propertyValues = beanDefinition.getPropertyValues();
         if (propertyValues != null && !propertyValues.isEmpty()) {
@@ -203,7 +205,9 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
     public boolean containsBeanDefinition(String name) {
         return this.beanDefinitionMap.containsKey(name);
     }
+
     public abstract Object applyBeanPostProcessorBeforeInitialization(Object existingBean, String beanName) throws BeansException, ReflectiveOperationException;
+
     public abstract Object applyBeanPostProcessorAfterInitialization(Object existingBean, String beanName) throws BeansException;
 
 }

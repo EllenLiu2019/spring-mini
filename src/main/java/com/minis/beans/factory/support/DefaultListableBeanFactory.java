@@ -2,6 +2,8 @@ package com.minis.beans.factory.support;
 
 import com.minis.beans.BeansException;
 import com.minis.beans.factory.config.BeanDefinition;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -10,6 +12,7 @@ import java.util.Map;
 
 public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFactory
         implements ConfigurableListableBeanFactory {
+    private static final Logger LOGGER = LogManager.getLogger(DefaultListableBeanFactory.class);
 
     private ConfigurableListableBeanFactory parentBeanFactory;
 
@@ -53,6 +56,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
         Object result = super.getBean(beanName);
         if (result == null) {
             result = this.parentBeanFactory.getBean(beanName);
+            LOGGER.debug("get bean {} from IoC", beanName);
         }
         return result;
     }

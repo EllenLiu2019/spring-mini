@@ -24,6 +24,7 @@ public class ClassPathXmlApplicationContext extends AbstractApplicationContext {
         reader.loadBeanDefinitions(resource);
         //TODO: 将BeanFactory的实例保存为当前类的成员变量以供后续使用（getBean()）
         this.beanFactory = beanFactory;
+        refresh();
     }
 
     public void registerBeanPostProcessors() {
