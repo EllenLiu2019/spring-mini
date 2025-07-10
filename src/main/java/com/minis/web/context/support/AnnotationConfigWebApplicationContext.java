@@ -161,7 +161,7 @@ public class AnnotationConfigWebApplicationContext extends AbstractApplicationCo
     @Override
     public void finishRefresh() {
         // TODO Auto-generated method stub
-        publishEvent(new ContextRefreshEvent("Controller Context Refreshed..."));
+        publishEvent(new ContextRefreshEvent("[Controller Context Refreshed]"));
     }
 
     @Override

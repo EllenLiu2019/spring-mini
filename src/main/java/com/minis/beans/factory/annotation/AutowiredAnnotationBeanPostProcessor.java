@@ -3,6 +3,8 @@ package com.minis.beans.factory.annotation;
 import com.minis.beans.BeanFactory;
 import com.minis.beans.BeansException;
 import com.minis.beans.factory.config.BeanPostProcessor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.lang.reflect.Field;
 
@@ -11,10 +13,11 @@ import java.lang.reflect.Field;
 //  方法：postProcessBeforeInitialization
 //  主要用途：1. 扫描类中所有带 @Autowired 注解的属性，并设置属性值
 public class AutowiredAnnotationBeanPostProcessor implements BeanPostProcessor {
+    private static final Logger LOGGER = LogManager.getLogger(AutowiredAnnotationBeanPostProcessor.class.getName());
     private BeanFactory beanFactory;
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException, ReflectiveOperationException {
-        System.out.println("postProcessBeforeInitialization for bean: " + beanName);
+        LOGGER.debug("post Process Before Initialization for bean: " + beanName);
 
         Object result = bean;
         Class<?> clazz = bean.getClass();
@@ -25,7 +28,7 @@ public class AutowiredAnnotationBeanPostProcessor implements BeanPostProcessor {
                 Object autowiredObj = this.beanFactory.getBean(fieldName);
                 field.setAccessible(true);
                 field.set(bean, autowiredObj);
-                System.out.println("autowire " + fieldName + " for bean " + beanName);
+                LOGGER.debug("autowire " + fieldName + " for bean: " + beanName);
             }
         }
         return result;

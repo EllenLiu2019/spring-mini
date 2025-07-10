@@ -77,6 +77,6 @@ public class ClassPathXmlApplicationContext extends AbstractApplicationContext {
 
     @Override
     public void finishRefresh() {
-        publishEvent(new ContextRefreshEvent("Ioc Context Refreshed..."));
+        publishEvent(new ContextRefreshEvent("[Ioc Context Refreshed]"));
     }
 }

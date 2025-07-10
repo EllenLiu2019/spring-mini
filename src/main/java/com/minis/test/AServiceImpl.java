@@ -2,10 +2,14 @@ package com.minis.test;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 
 @Data
 @NoArgsConstructor
 public class AServiceImpl implements AService {
+    private static final Logger LOGGER = LogManager.getLogger(AServiceImpl.class.getName());
 
     private String name;
     private int level;
@@ -16,12 +20,12 @@ public class AServiceImpl implements AService {
     public AServiceImpl(String name, int level) {
         this.name = name;
         this.level = level;
-        System.out.println(this.name + "," + this.level);
+        LOGGER.info(this.name + "," + this.level);
     }
 
     @Override
     public void sayHello() {
-        System.out.println("a service 1 say hello");
+        LOGGER.info("a service 1 say hello");
     }
 
 
