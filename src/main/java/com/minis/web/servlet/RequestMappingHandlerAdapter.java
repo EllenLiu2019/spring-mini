@@ -68,7 +68,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) {
-        // TODO: this is a controller context, so it should be a subclass of AbstractApplicationContext
+        // TODO: this is a servlet context, so it should be a subclass of AbstractApplicationContext
         //  and it can obtain parent context, it has the ability to obtain all beans
         this.webApplicationContext = applicationContext;
     }

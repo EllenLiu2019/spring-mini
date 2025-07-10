@@ -30,8 +30,8 @@ public abstract class AbstractApplicationContext implements ApplicationContext {
     }
 
     @Override
-    // TODO: it's sub-class override this method, so this method only serves controller context,
-    //  means all controller beans extended ApplicationContextAware can obtain controller context
+    // TODO: it's sub-class override this method, so this method only serves servlet context,
+    //  means all servlet controller beans extended ApplicationContextAware can obtain controller context
     public Object getBean(String beanName) throws BeansException, ReflectiveOperationException {
         Object returnObj = getBeanFactory().getBean(beanName);
         if (returnObj instanceof ApplicationContextAware) {

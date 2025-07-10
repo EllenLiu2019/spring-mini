@@ -8,7 +8,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
-public class HelloWorld {
+public class HelloController {
     @RequestMapping("/get")
     public String doGet(Date date, String name) {
         String formattedDate = DateTimeFormatter

@@ -34,9 +34,9 @@ public class DispatcherServlet extends HttpServlet {
         LOGGER.debug("getting parent webApplication context from servlet context");
         parentWebApplicationContext = (WebApplicationContext) this.getServletContext().getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
 
-        // TODO: build up controller context,
-        //  controller context 持有对 listener 创建的 parent(ioc) XmlWebApplicationContext 的单向引用
-        LOGGER.debug("building up controller context...");
+        // TODO: build up servlet context,
+        //  servlet context 持有对 listener 创建的 parent(ioc) XmlWebApplicationContext 的单向引用
+        LOGGER.debug("building up servlet context...");
         String sContextConfigLocation = config.getInitParameter("contextConfigLocation");
         webApplicationContext = new AnnotationConfigWebApplicationContext(sContextConfigLocation, parentWebApplicationContext);
         try {

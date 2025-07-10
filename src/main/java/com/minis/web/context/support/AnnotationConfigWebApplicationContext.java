@@ -26,7 +26,7 @@ public class AnnotationConfigWebApplicationContext extends AbstractApplicationCo
 
     public AnnotationConfigWebApplicationContext(String fileName, WebApplicationContext parentApplicationContext) {
         this.parentApplicationContext = parentApplicationContext;
-        this.servletContext = parentApplicationContext.getServletContext(); // TODO: Ioc 与 Controller context 中 持有的 servlet context 是同一个
+        this.servletContext = parentApplicationContext.getServletContext(); // TODO: Ioc 与 servlet context 中 持有的 servlet context 是同一个
         this.beanFactory = new DefaultListableBeanFactory();
         this.beanFactory.setParent(this.parentApplicationContext.getBeanFactory());
 
@@ -161,7 +161,7 @@ public class AnnotationConfigWebApplicationContext extends AbstractApplicationCo
     @Override
     public void finishRefresh() {
         // TODO Auto-generated method stub
-        publishEvent(new ContextRefreshEvent("[Controller Context Refreshed]"));
+        publishEvent(new ContextRefreshEvent("[servlet webApplicationContext Refreshed]"));
     }
 
     @Override

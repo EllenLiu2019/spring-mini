@@ -4,7 +4,7 @@ import com.minis.context.ClassPathXmlApplicationContext;
 import com.minis.web.context.WebApplicationContext;
 import jakarta.servlet.ServletContext;
 
-//TODO: Ioc container, also called controller's parent container
+//TODO: Ioc container, also called servlet's parent container
 public class XmlWebApplicationContext extends ClassPathXmlApplicationContext implements WebApplicationContext {
     private ServletContext servletContext;
     public XmlWebApplicationContext(String fileName) {

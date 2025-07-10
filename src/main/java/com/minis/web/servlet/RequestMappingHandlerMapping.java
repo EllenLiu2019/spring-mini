@@ -47,7 +47,7 @@ public class RequestMappingHandlerMapping implements HandlerMapping {
     @Override
     public HandlerMethod getHandler(HttpServletRequest request) {
         // TODO: 通过 request 中的 path 获取 url 对应的 beanInstance & method
-        //  build up HandlerMethod
+        //  build up HandlerMethod which is the "request-handler"
         String servletPath = request.getServletPath();
         if (!mappingRegistry.getUrlMappingNames().contains(servletPath)) {
             return null;
