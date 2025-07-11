@@ -143,19 +143,23 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
                 Class<?>[] paramTypes = new Class<?>[1];
                 Object[] paramValues = new Object[1];
                 String pType = pv.getType();
+                Object pValue = pv.getValue();
 
                 try {
                     if (!isRef) {
                         if ("String".equals(pType) || "java.lang.String".equals(pType)) {
                             paramTypes[0] = String.class;
+                            paramValues[0] = pValue;
                         } else if ("Integer".equals(pType) || "java.lang.Integer".equals(pType)) {
                             paramTypes[0] = Integer.class;
+                            paramValues[0] = Integer.valueOf((String) pValue);
                         } else if ("int".equals(pType)) {
                             paramTypes[0] = int.class;
+                            paramValues[0] = Integer.valueOf((String) pValue).intValue();
                         } else {
                             paramTypes[0] = String.class;
+                            paramValues[0] = pValue;
                         }
-                        paramValues[0] = pv.getValue();
                     } else {
                         paramTypes[0] = Class.forName(pType);
                         paramValues[0] = getBean((String) pv.getValue());

@@ -10,6 +10,7 @@ import com.minis.web.bind.annotation.ResponseBody;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.List;
 
 public class HelloController {
     @Autowired
@@ -53,7 +54,11 @@ public class HelloController {
         return userService.getUser(1);
     }
     @RequestMapping("/test7")
-    public User doTest7() {
-        return userService.getUserPre(1);
+    public List<User> doTest7() {
+        return userService.getUserByName("Alice");
+    }
+    @RequestMapping("/test8")
+    public List<User> doTest8() {
+         return userService.getAllUsersByName("Alice");
     }
 }

@@ -34,12 +34,13 @@
     <bean id="contextListener" class="com.minis.context.DefaultContextListener" />
 
     <bean id="jdbcTemplate" class="com.minis.jdbc.core.JdbcTemplate" />
-    <bean id="dataSource" class="com.minis.jdbc.datasource.SingleConnectionDataSource">
+    <bean id="dataSource" class="com.minis.jdbc.pool.PooledDataSource">
         <!-- TODO: this driverClassName will be detected automatically,
                    this is no use, comment to remind the underlying implementation -->
         <!--<property type="String" name="driverClassName" value="com.mysql.cj.jdbc.Driver"/>-->
         <property type="String" name="url" value="jdbc:mysql://localhost:3306/spring-mini"/>
         <property type="String" name="username" value="deepblue"/>
         <property type="String" name="password" value="deepblue123456"/>
+        <property type="int" name="initialSize" value="3"/>
     </bean>
 </beans>

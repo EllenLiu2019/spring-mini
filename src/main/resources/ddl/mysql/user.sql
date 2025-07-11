@@ -6,4 +6,3 @@ create table `user` (
     PRIMARY KEY(`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
-CREATE UNIQUE INDEX uniq_dbm_index1 ON user (name);

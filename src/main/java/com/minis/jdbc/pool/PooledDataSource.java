@@ -1,7 +1,8 @@
-package com.minis.jdbc.datasource;
+package com.minis.jdbc.pool;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.sql.DataSource;
 import java.io.PrintWriter;
@@ -9,10 +10,14 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
-public class SingleConnectionDataSource implements DataSource {
+@Slf4j
+public class PooledDataSource implements DataSource {
     @Setter
     private String driverClassName;
     @Setter
@@ -24,7 +29,24 @@ public class SingleConnectionDataSource implements DataSource {
     private String password;
     @Getter
     private Properties connectionProperties;
-    private Connection connection;
+    private List<PooledConnection> connections;
+    @Setter
+    private int initialSize = 2;
+
+    private void initPool() {
+        this.connections = new ArrayList<>(initialSize);
+        for (int i = 0; i < initialSize; i++) {
+            try {
+                Connection connection = DriverManager.getConnection(url, username, password);
+                PooledConnection pooledConnection = new PooledConnection(connection, false);
+                this.connections.add(pooledConnection);
+                log.debug("*****************init pooled connection {}", i);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
     @Override
     public Connection getConnection() throws SQLException {
         return getConnectionFromDriver(username, password);
@@ -44,11 +66,36 @@ public class SingleConnectionDataSource implements DataSource {
         if (username != null) {
             mergedProps.setProperty("user", username);
         }
-        if(password != null) {
+        if (password != null) {
             mergedProps.setProperty("password", password);
         }
-        this.connection = getConnectionFromDriverManager(getUrl(), mergedProps);
-        return this.connection;
+
+        if (this.connections == null) {
+            initPool();
+        }
+
+        PooledConnection availableConnection = getAvailableConnection();
+        while (availableConnection == null) {
+            availableConnection = getAvailableConnection();
+            if (availableConnection == null) {
+                try {
+                    TimeUnit.MILLISECONDS.sleep(30);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+        return availableConnection;
+    }
+
+    private PooledConnection getAvailableConnection() {
+        for (PooledConnection pooledConnection : this.connections) {
+            if (!pooledConnection.isActive()) {
+                pooledConnection.setActive(true);
+            }
+            return pooledConnection;
+        }
+        return null;
     }
 
     private Connection getConnectionFromDriverManager(String url, Properties mergedProps) throws SQLException {
