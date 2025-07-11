@@ -1,4 +1,4 @@
-package com.minis.test;
+package com.minis.test.ioc;
 
 import com.minis.beans.factory.annotation.Autowired;
 import lombok.Data;

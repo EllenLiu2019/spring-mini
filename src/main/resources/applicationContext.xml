@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <beans>
-    <bean id="baseBaseService" class="com.minis.test.BaseBaseService" init-method="init">
-        <property type="com.minis.test.AServiceImpl" name="as" ref="aService"/>
+    <bean id="baseBaseService" class="com.minis.test.ioc.BaseBaseService" init-method="init">
+        <property type="com.minis.test.ioc.AServiceImpl" name="as" ref="aService"/>
     </bean>
 
-    <bean id="aService" class="com.minis.test.AServiceImpl">
+    <bean id="aService" class="com.minis.test.ioc.AServiceImpl">
         <constructor-arg type="String" name="name" value="abc"/>
         <constructor-arg type="int" name="level" value="3"/>
         <property type="String" name="property1" value="Someone says"/>
         <property type="String" name="property2" value="Hello World!"/>
-        <property type="com.minis.test.BaseService" name="ref1" ref="baseService"/>
+        <property type="com.minis.test.ioc.BaseService" name="ref1" ref="baseService"/>
     </bean>
 
-    <bean id="baseService" class="com.minis.test.BaseService"/>
+    <bean id="baseService" class="com.minis.test.ioc.BaseService"/>
 
     <bean id="handlerMapping" class="com.minis.web.servlet.RequestMappingHandlerMapping"/>
     <bean id="handlerAdapter" class="com.minis.web.servlet.RequestMappingHandlerAdapter">
@@ -20,16 +20,26 @@
         <property type="com.minis.web.bind.support.WebBindingInitializer" name="webBindingInitializer" ref="webBindingInitializer"/>
     </bean>
 
-    <bean id="webBindingInitializer" class="com.minis.test.DateInitializer"/>
+    <bean id="webBindingInitializer" class="com.minis.test.mvc.DateInitializer"/>
 
     <bean id="messageConverter" class="com.minis.web.converter.DefaultHttpMessageConverter">
         <property type="com.minis.utils.ObjectMapper" name="objectMapper" ref="objectMapper"/>
     </bean>
 
     <bean id="objectMapper" class="com.minis.utils.DefaultObjectMapper">
-        <property type="String" name="dateFormat" value="yyyy/MM/dd"/>
+        <property type="String" name="dateFormat" value="yyyy-MM-dd"/>
         <property type="String" name="decimalFormat" value="###.##"/>
     </bean>
 
     <bean id="contextListener" class="com.minis.context.DefaultContextListener" />
+
+    <bean id="jdbcTemplate" class="com.minis.jdbc.core.JdbcTemplate" />
+    <bean id="dataSource" class="com.minis.jdbc.datasource.SingleConnectionDataSource">
+        <!-- TODO: this driverClassName will be detected automatically,
+                   this is no use, comment to remind the underlying implementation -->
+        <!--<property type="String" name="driverClassName" value="com.mysql.cj.jdbc.Driver"/>-->
+        <property type="String" name="url" value="jdbc:mysql://localhost:3306/spring-mini"/>
+        <property type="String" name="username" value="deepblue"/>
+        <property type="String" name="password" value="deepblue123456"/>
+    </bean>
 </beans>

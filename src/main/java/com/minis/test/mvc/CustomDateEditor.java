@@ -1,4 +1,4 @@
-package com.minis.test;
+package com.minis.test.mvc;
 
 import com.minis.beans.PropertyEditor;
 import com.minis.utils.StringUtils;

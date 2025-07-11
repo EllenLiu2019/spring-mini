@@ -1,4 +1,4 @@
-package com.minis.test;
+package com.minis.test.ioc;
 
 public interface AService {
     void sayHello();

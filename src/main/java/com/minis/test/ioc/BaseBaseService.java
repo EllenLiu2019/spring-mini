@@ -1,4 +1,4 @@
-package com.minis.test;
+package com.minis.test.ioc;
 
 import lombok.Data;
 import org.apache.logging.log4j.LogManager;

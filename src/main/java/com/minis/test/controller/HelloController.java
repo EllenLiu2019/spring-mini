@@ -1,8 +1,9 @@
 package com.minis.test.controller;
 
 import com.minis.beans.factory.annotation.Autowired;
-import com.minis.test.BaseService;
+import com.minis.test.ioc.BaseService;
 import com.minis.test.entity.User;
+import com.minis.test.jdbc.UserService;
 import com.minis.web.bind.annotation.RequestMapping;
 import com.minis.web.bind.annotation.ResponseBody;
 
@@ -13,6 +14,9 @@ import java.util.Date;
 public class HelloController {
     @Autowired
     BaseService baseService;
+
+    @Autowired
+    UserService userService;
     @RequestMapping("/get")
     public String doGet(Date date, String name) {
         String formattedDate = DateTimeFormatter
@@ -43,5 +47,13 @@ public class HelloController {
     @RequestMapping("/test5")
     public void doTest5() {
         baseService.sayHello();
+    }
+    @RequestMapping("/test6")
+    public User doTest6() {
+        return userService.getUser(1);
+    }
+    @RequestMapping("/test7")
+    public User doTest7() {
+        return userService.getUserPre(1);
     }
 }
