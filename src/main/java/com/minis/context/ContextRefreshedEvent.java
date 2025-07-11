@@ -1,8 +1,8 @@
 package com.minis.context;
 
-public class ContextRefreshEvent extends ApplicationEvent {
+public class ContextRefreshedEvent extends ApplicationContextEvent {
     private static final long serialVersionUID = 1L;
-    public ContextRefreshEvent(Object source) {
+    public ContextRefreshedEvent(Object source) {
         super(source);
     }
     public String toString() {

@@ -21,7 +21,9 @@ public class XmlBeanDefinitionReader {
             Element element = (Element) resource.next();
             String beanId = element.attributeValue("id");
             String className = element.attributeValue("class");
+            String initMethod = element.attributeValue("init-method");
             BeanDefinition beanDefinition = new BeanDefinition(beanId, className);
+            beanDefinition.setInitMethodName(initMethod);
 
             //TODO: 构造函数参数
             List<Element> argsElems = element.elements("constructor-arg");

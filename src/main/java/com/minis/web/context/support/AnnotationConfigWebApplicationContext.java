@@ -7,6 +7,7 @@ import com.minis.beans.factory.support.DefaultListableBeanFactory;
 import com.minis.context.*;
 import com.minis.web.context.WebApplicationContext;
 import jakarta.servlet.ServletContext;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.lang.reflect.Modifier;
@@ -19,6 +20,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
+@Slf4j
 public class AnnotationConfigWebApplicationContext extends AbstractApplicationContext implements WebApplicationContext {
     private ServletContext servletContext;
     private WebApplicationContext parentApplicationContext; // TODO: 持有对parent application context的单项引用
@@ -43,7 +45,9 @@ public class AnnotationConfigWebApplicationContext extends AbstractApplicationCo
         List<String> packageNames = XmlScanComponentHelper.getNodeValue(xmlPath);
         List<String> controllerNames = scanPackages(packageNames);
         loadBeanDefinitions(controllerNames);
+        log.debug("-------------> [Servlet] webApplicationContext refresh START <-------------");
         refresh();
+        log.debug("-------------> [Servlet] webApplicationContext refresh END <-------------");
     }
 
     private void loadBeanDefinitions(List<String> controllerNames) {
@@ -128,14 +132,24 @@ public class AnnotationConfigWebApplicationContext extends AbstractApplicationCo
     }
 
     @Override
-    public void addApplicationListener(ApplicationListener listener) {
+    public void addApplicationListener(ApplicationListener<?> listener) {
         this.getApplicationEventPublisher().addApplicationListener(listener);
     }
 
     @Override
     public void registerListeners() {
-        ApplicationListener listener = new ApplicationListener();
-        this.getApplicationEventPublisher().addApplicationListener(listener);
+        String[] bdNames = this.beanFactory.getBeanDefinitionNames();
+        for (String bdName : bdNames) {
+            Object bean;
+            try {
+                bean = this.beanFactory.getBean(bdName);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            if (bean instanceof ApplicationListener<?> listener) {
+                this.getApplicationEventPublisher().addApplicationListener(listener);
+            }
+        }
     }
 
     @Override
@@ -160,8 +174,7 @@ public class AnnotationConfigWebApplicationContext extends AbstractApplicationCo
 
     @Override
     public void finishRefresh() {
-        // TODO Auto-generated method stub
-        publishEvent(new ContextRefreshEvent("[servlet webApplicationContext Refreshed]"));
+        this.publishEvent(new ContextRefreshedEvent(this));
     }
 
     @Override

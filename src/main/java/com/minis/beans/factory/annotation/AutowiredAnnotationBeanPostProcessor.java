@@ -1,6 +1,6 @@
 package com.minis.beans.factory.annotation;
 
-import com.minis.beans.BeanFactory;
+import com.minis.beans.factory.BeanFactory;
 import com.minis.beans.BeansException;
 import com.minis.beans.factory.config.BeanPostProcessor;
 import org.apache.logging.log4j.LogManager;
@@ -36,6 +36,7 @@ public class AutowiredAnnotationBeanPostProcessor implements BeanPostProcessor {
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+        LOGGER.debug("postProcess After Initialization for bean: " + beanName);
         return bean;
     }
 

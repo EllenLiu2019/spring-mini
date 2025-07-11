@@ -12,4 +12,7 @@ public class BaseBaseService {
     public void sayHello() {
         LOGGER.info("BaseBaseService says Hello");
     }
+    public void init() {
+        LOGGER.info("-------call init-method----------");
+    }
 }

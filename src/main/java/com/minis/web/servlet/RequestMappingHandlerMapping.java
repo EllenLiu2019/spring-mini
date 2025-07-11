@@ -1,20 +1,19 @@
 package com.minis.web.servlet;
 
 import com.minis.beans.BeansException;
+import com.minis.context.ApplicationContext;
+import com.minis.context.ApplicationContextAware;
 import com.minis.web.bind.annotation.RequestMapping;
-import com.minis.web.context.WebApplicationContext;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.lang.reflect.Method;
 
-public class RequestMappingHandlerMapping implements HandlerMapping {
+public class RequestMappingHandlerMapping implements HandlerMapping, ApplicationContextAware {
     private MappingRegistry mappingRegistry;
-    private WebApplicationContext applicationContext;
+    private ApplicationContext applicationContext;
 
-    public RequestMappingHandlerMapping(WebApplicationContext applicationContext) {
-        this.applicationContext = applicationContext;
+    public RequestMappingHandlerMapping() {
         this.mappingRegistry = new MappingRegistry();
-        registerMapping();
     }
 
     protected void registerMapping() {
@@ -48,6 +47,7 @@ public class RequestMappingHandlerMapping implements HandlerMapping {
     public HandlerMethod getHandler(HttpServletRequest request) {
         // TODO: 通过 request 中的 path 获取 url 对应的 beanInstance & method
         //  build up HandlerMethod which is the "request-handler"
+        registerMapping();
         String servletPath = request.getServletPath();
         if (!mappingRegistry.getUrlMappingNames().contains(servletPath)) {
             return null;
@@ -55,5 +55,10 @@ public class RequestMappingHandlerMapping implements HandlerMapping {
         Object beanInstance = mappingRegistry.getMappingObjs().get(servletPath);
         Method method = mappingRegistry.getMappingMethods().get(servletPath);
         return new HandlerMethod(beanInstance, method);
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
     }
 }

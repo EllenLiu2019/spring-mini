@@ -4,10 +4,13 @@ import com.minis.beans.BeansException;
 import com.minis.beans.PropertyValue;
 import com.minis.beans.PropertyValues;
 import com.minis.beans.factory.config.*;
+import com.minis.utils.ClassUtils;
+import com.minis.utils.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,22 +32,34 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
             if (singleton == null) {
                 LOGGER.debug("Creating singleton bean '" + beanName + "'");
                 BeanDefinition beanDefinition = this.beanDefinitionMap.get(beanName);
-                if (beanDefinition != null) {
+                if (beanDefinition != null && !beanDefinition.equals(StringUtils.EMPTY)) {
                     singleton = creatBean(beanDefinition);
                     this.registerSingleton(beanName, singleton);
-                    // TODO: step 1: postProcessBeforeInitialization
+                    // TODO: postProcess Before Initialization
                     applyBeanPostProcessorBeforeInitialization(singleton, beanName);
-                    //   step 2: afterPropertiesSet
-                    // TODO:  step 3: init-method
-                    /*if (beanDefinition.getInitMethodName() != null && !beanDefinition.equals("")) {
+                    // TODO: init-method
+                    if (beanDefinition.getInitMethodName() != null) {
                         invokeInitMethod(beanDefinition, singleton);
-                    }*/
-                    // TODO:  step 4: postProcessAfterInitialization
+                    }
+                    // TODO: postProcess After Initialization
                     applyBeanPostProcessorAfterInitialization(singleton, beanName);
                 }
             }
         }
         return singleton;
+    }
+
+    private void invokeInitMethod(BeanDefinition beanDef, Object singleton) {
+        Class<?> clazz = singleton.getClass();
+        String initMethodName = beanDef.getInitMethodName();
+        if (initMethodName != null && !initMethodName.isEmpty()) {
+            Method initMethod = ClassUtils.getMethod(clazz, initMethodName);
+            try {
+                initMethod.invoke(singleton);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     public void refresh() {

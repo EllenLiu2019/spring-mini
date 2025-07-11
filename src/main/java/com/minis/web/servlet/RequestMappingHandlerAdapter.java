@@ -37,19 +37,30 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
     private void invokeHandlerMethod(HttpServletRequest request, HttpServletResponse response, HandlerMethod handler) throws Exception {
         Parameter[] methodParameters = handler.getMethod().getParameters();
 
+        boolean isRequestParam = false;
+        List<Object> methodsServletParmaObjs = new ArrayList<>();
+
         List<Object> methodParamObjList = new ArrayList<>();
         List<String> methodParamObjNameList = new ArrayList<>();
+        Object[] methodParamObjs = new Object[methodParameters.length];
         for (Parameter methodParameter : methodParameters) {
-            Object methodParamObj = methodParameter.getType().getConstructor().newInstance();
-            methodParamObjList.add(methodParamObj);
-            methodParamObjNameList.add(methodParameter.getName());
+            if (methodParameter.getType() == HttpServletRequest.class || methodParameter.getType() == HttpServletResponse.class) {
+                isRequestParam = true;
+                methodsServletParmaObjs.add(methodParameter.getType() == HttpServletRequest.class ? request : response);
+            } else {
+                Object methodParamObj = methodParameter.getType().getConstructor().newInstance();
+                methodParamObjList.add(methodParamObj);
+                methodParamObjNameList.add(methodParameter.getName());
+            }
         }
-
-        WebDataBinder wdb = new WebDataBinderFactory().createBinder(request, methodParamObjList, methodParamObjNameList);
-        webBindingInitializer.registerBinder(wdb);
-        wdb.bind(request);
-
-        Object[] methodParamObjs = methodParamObjList.toArray();
+        if (isRequestParam) {
+            methodParamObjs = methodsServletParmaObjs.toArray();
+        } else if (!methodParamObjList.isEmpty()) {
+            WebDataBinder wdb = new WebDataBinderFactory().createBinder(request, methodParamObjList, methodParamObjNameList);
+            webBindingInitializer.registerBinder(wdb);
+            wdb.bind(request);
+            methodParamObjs = methodParamObjList.toArray();
+        }
 
         Method invocableMethod = handler.getMethod();
         Object returnObj = invocableMethod.invoke(handler.getBean(), methodParamObjs);

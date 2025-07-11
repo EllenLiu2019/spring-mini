@@ -7,10 +7,12 @@ import com.minis.beans.factory.support.ConfigurableListableBeanFactory;
 import com.minis.beans.factory.support.DefaultListableBeanFactory;
 import com.minis.beans.factory.xml.XmlBeanDefinitionReader;
 import com.minis.core.ClassPathXmlResource;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 public class ClassPathXmlApplicationContext extends AbstractApplicationContext {
     private DefaultListableBeanFactory beanFactory;
     private final List<BeanFactoryPostProcessor> beanFactoryPostProcessors = new ArrayList<>();
@@ -24,7 +26,9 @@ public class ClassPathXmlApplicationContext extends AbstractApplicationContext {
         reader.loadBeanDefinitions(resource);
         //TODO: 将BeanFactory的实例保存为当前类的成员变量以供后续使用（getBean()）
         this.beanFactory = beanFactory;
+        log.debug("-------------> [IoC] webApplicationContext refresh START<-------------");
         refresh();
+        log.debug("-------------> [IoC] webApplicationContext refresh END <-------------");
     }
 
     public void registerBeanPostProcessors() {
@@ -42,8 +46,18 @@ public class ClassPathXmlApplicationContext extends AbstractApplicationContext {
 
     @Override
     public void registerListeners() {
-        ApplicationListener listener = new ApplicationListener();
-        this.getApplicationEventPublisher().addApplicationListener(listener);
+        String[] bdNames = this.beanFactory.getBeanDefinitionNames();
+        for (String bdName : bdNames) {
+            Object bean;
+            try {
+                bean = this.beanFactory.getBean(bdName);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            if (bean instanceof ApplicationListener<?> listener) {
+                this.getApplicationEventPublisher().addApplicationListener(listener);
+            }
+        }
     }
 
     @Override
@@ -62,7 +76,7 @@ public class ClassPathXmlApplicationContext extends AbstractApplicationContext {
     }
 
     @Override
-    public void addApplicationListener(ApplicationListener listener) {
+    public void addApplicationListener(ApplicationListener<?> listener) {
         this.getApplicationEventPublisher().addApplicationListener(listener);
     }
 
@@ -78,6 +92,6 @@ public class ClassPathXmlApplicationContext extends AbstractApplicationContext {
 
     @Override
     public void finishRefresh() {
-        publishEvent(new ContextRefreshEvent("[Ioc Context Refreshed]"));
+        this.publishEvent(new ContextRefreshedEvent(this));
     }
 }

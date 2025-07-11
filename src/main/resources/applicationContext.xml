@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <beans>
-    <bean id="baseBaseService" class="com.minis.test.BaseBaseService">
+    <bean id="baseBaseService" class="com.minis.test.BaseBaseService" init-method="init">
         <property type="com.minis.test.AServiceImpl" name="as" ref="aService"/>
     </bean>
 
@@ -14,6 +14,7 @@
 
     <bean id="baseService" class="com.minis.test.BaseService"/>
 
+    <bean id="handlerMapping" class="com.minis.web.servlet.RequestMappingHandlerMapping"/>
     <bean id="handlerAdapter" class="com.minis.web.servlet.RequestMappingHandlerAdapter">
         <property type="com.minis.web.converter.HttpMessageConverter" name="messageConverter" ref="messageConverter"/>
         <property type="com.minis.web.bind.support.WebBindingInitializer" name="webBindingInitializer" ref="webBindingInitializer"/>
@@ -30,4 +31,5 @@
         <property type="String" name="decimalFormat" value="###.##"/>
     </bean>
 
+    <bean id="contextListener" class="com.minis.context.DefaultContextListener" />
 </beans>

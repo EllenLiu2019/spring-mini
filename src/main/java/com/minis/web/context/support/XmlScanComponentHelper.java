@@ -19,8 +19,9 @@ public class XmlScanComponentHelper {
             e.printStackTrace();
         }
         assert document != null;
-        Element rootElement = document.getRootElement();
-        for (Element element : rootElement.elements()) {
+        Element root = document.getRootElement();
+        List<Element> elements = root.elements("component-scan");
+        for (Element element : elements) {
             packages.add(element.attributeValue("base-package"));
         }
         return packages;

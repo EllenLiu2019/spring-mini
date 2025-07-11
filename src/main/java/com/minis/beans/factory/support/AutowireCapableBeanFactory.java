@@ -1,7 +1,7 @@
 package com.minis.beans.factory.support;
 
 
-import com.minis.beans.BeanFactory;
+import com.minis.beans.factory.BeanFactory;
 import com.minis.beans.BeansException;
 
 public interface AutowireCapableBeanFactory extends BeanFactory {

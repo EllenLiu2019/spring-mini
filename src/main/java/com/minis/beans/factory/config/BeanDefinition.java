@@ -2,6 +2,8 @@ package com.minis.beans.factory.config;
 
 import com.minis.beans.PropertyValues;
 import com.minis.beans.factory.support.ConfigurableBeanFactory;
+import lombok.Getter;
+import lombok.Setter;
 
 public class BeanDefinition {
 
@@ -18,10 +20,8 @@ public class BeanDefinition {
     private ConstructorArgumentValues constructorArgumentValues;
     private PropertyValues propertyValues;
 
-    public String getInitMethodName() {
-        return initMethodName;
-    }
-
+    @Getter
+    @Setter
     private String initMethodName;
     private String id;
     private String className;
