@@ -1,6 +1,10 @@
 package com.minis.aop;
 
+import com.minis.beans.BeansException;
+import com.minis.beans.factory.BeanFactory;
+import com.minis.beans.factory.BeanFactoryAware;
 import com.minis.beans.factory.FactoryBean;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 /*
@@ -14,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
  **  > IAction proxyIns = (IAction) proxy.getProxy();
  */
 @Slf4j
-public class ProxyFactoryBean implements FactoryBean<Object> {
+public class ProxyFactoryBean implements FactoryBean<Object>, BeanFactoryAware {
 
     private Object target; // TODO: the realAction actually
 
@@ -30,7 +34,12 @@ public class ProxyFactoryBean implements FactoryBean<Object> {
      **     getProxy() -> Proxy.newProxyInstance(JdkDynamicAopProxy.class.getClassLoader(), target.getClass().getInterfaces(), this)
      */
     private final AopProxyFactory aopProxyFactory;
-    private Object singletonInstance; // TODO: 代理对象
+    private Object singletonInstance; // TODO: 生成的代理对象
+
+    private BeanFactory beanFactory;
+    @Setter
+    private String interceptorName; // TODO: beanName, used to invoke getBean("interceptorName")
+    private Advisor advisor;
 
     public ProxyFactoryBean() {
         this.aopProxyFactory = new DefaultAopProxyFactory();
@@ -40,8 +49,28 @@ public class ProxyFactoryBean implements FactoryBean<Object> {
         this.target = target;
     }
 
+    private synchronized void initializeAdvisor() {
+        Object advice;
+        MethodInterceptor interceptor = null;
+        try {
+            advice = this.beanFactory.getBean(this.interceptorName);
+            this.advisor = new DefaultAdvisor();
+            if (advice instanceof BeforeAdvice) {
+                interceptor = new MethodBeforeAdviceInterceptor((MethodBeforeAdvice) advice);
+            } else if (advice instanceof AfterAdvice) {
+                interceptor = new AfterReturningAdviceInterceptor((AfterReturningAdvice) advice);
+            } else if (advice instanceof MethodInterceptor) {
+                interceptor = (MethodInterceptor) advice;
+            }
+            advisor.setMethodInterceptor(interceptor);
+        } catch (BeansException | ReflectiveOperationException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @Override
     public Object getObject() throws Exception {
+        initializeAdvisor();
         return getSingletonInstance();
     }
 
@@ -51,7 +80,7 @@ public class ProxyFactoryBean implements FactoryBean<Object> {
             return this.singletonInstance;
         }
         log.debug("proxy not exist yet, getting proxy for target={}", target);
-        AopProxy aopProxy = this.aopProxyFactory.createAopProxy(target);
+        AopProxy aopProxy = this.aopProxyFactory.createAopProxy(target, advisor);
         this.singletonInstance = aopProxy.getProxy();
         log.debug("got proxy instance for target={}, singletonInstance={}, beanClass={}",
                 target, singletonInstance, singletonInstance.getClass());
@@ -71,5 +100,10 @@ public class ProxyFactoryBean implements FactoryBean<Object> {
     @Override
     public Class<?> getObjectType() {
         return null;
+    }
+
+    @Override
+    public void setBeanFactory(BeanFactory beanFactory) {
+        this.beanFactory = beanFactory;
     }
 }

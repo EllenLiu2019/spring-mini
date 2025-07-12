@@ -3,6 +3,7 @@ package com.minis.beans.factory.support;
 import com.minis.beans.BeansException;
 import com.minis.beans.PropertyValue;
 import com.minis.beans.PropertyValues;
+import com.minis.beans.factory.BeanFactoryAware;
 import com.minis.beans.factory.FactoryBean;
 import com.minis.beans.factory.config.*;
 import com.minis.utils.ClassUtils;
@@ -39,6 +40,11 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
                 LOGGER.debug("NOT early exposed yet, creating singleton bean '" + beanName + "'");
                 singleton = creatBean(beanDefinition);
                 this.registerSingleton(beanName, singleton);
+
+                if (singleton instanceof BeanFactoryAware) {
+                    ((BeanFactoryAware) singleton).setBeanFactory(this);
+                }
+
                 // TODO: postProcess Before Initialization
                 applyBeanPostProcessorBeforeInitialization(singleton, beanName);
                 // TODO: init-method
