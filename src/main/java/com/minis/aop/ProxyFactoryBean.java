@@ -39,7 +39,7 @@ public class ProxyFactoryBean implements FactoryBean<Object>, BeanFactoryAware {
     private BeanFactory beanFactory;
     @Setter
     private String interceptorName; // TODO: beanName, used to invoke getBean("interceptorName")
-    private Advisor advisor;
+    private PointcutAdvisor advisor;
 
     public ProxyFactoryBean() {
         this.aopProxyFactory = new DefaultAopProxyFactory();
@@ -51,18 +51,18 @@ public class ProxyFactoryBean implements FactoryBean<Object>, BeanFactoryAware {
 
     private synchronized void initializeAdvisor() {
         Object advice;
-        MethodInterceptor interceptor = null;
+        //MethodInterceptor interceptor = null;
         try {
             advice = this.beanFactory.getBean(this.interceptorName);
-            this.advisor = new DefaultAdvisor();
-            if (advice instanceof BeforeAdvice) {
+            /*if (advice instanceof BeforeAdvice) {
                 interceptor = new MethodBeforeAdviceInterceptor((MethodBeforeAdvice) advice);
             } else if (advice instanceof AfterAdvice) {
                 interceptor = new AfterReturningAdviceInterceptor((AfterReturningAdvice) advice);
             } else if (advice instanceof MethodInterceptor) {
                 interceptor = (MethodInterceptor) advice;
             }
-            advisor.setMethodInterceptor(interceptor);
+            advisor.setMethodInterceptor(interceptor);*/
+            this.advisor = (PointcutAdvisor) advice;
         } catch (BeansException | ReflectiveOperationException e) {
             throw new RuntimeException(e);
         }

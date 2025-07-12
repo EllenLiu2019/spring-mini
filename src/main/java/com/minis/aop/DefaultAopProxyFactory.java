@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class DefaultAopProxyFactory implements AopProxyFactory {
     @Override
-    public AopProxy createAopProxy(Object target, Advisor advisor) {
+    public AopProxy createAopProxy(Object target, PointcutAdvisor advisor) {
         log.debug("creating JdkDynamicAopProxy using target={}", target);
         return new JdkDynamicAopProxy(target, advisor);
     }

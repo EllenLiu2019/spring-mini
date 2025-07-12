@@ -30,51 +30,69 @@ public class DefaultObjectMapper implements ObjectMapper {
 
     @Override
     public String writeValuesAsString(Object item) {
-        StringBuilder sJsonStr = new StringBuilder("{");
+        StringBuilder sb = new StringBuilder();
+        buildJson(item, sb);
+        return sb.toString();
+    }
+
+    private void buildJson(Object item, StringBuilder sb) {
+        if (item == null) {
+            sb.append("null");
+            return;
+        }
 
         if (item instanceof Collection<?>) {
-            sJsonStr.append("[");
+            sb.append("[");
+            final boolean[] first = {true};
             ((Collection<?>) item).forEach(obj -> {
-                if (!sJsonStr.substring(sJsonStr.length() - 1).equals("[")) {
-                    sJsonStr.append(",");
+                if (!first[0]) {
+                    sb.append(",");
                 }
-                sJsonStr.append(writeValuesAsString(obj));
+                buildJson(obj, sb);
+                first[0] = false;
             });
-            sJsonStr.append("]");
+            sb.append("]");
         } else {
+            sb.append("{");
             Class<?> clz = item.getClass();
             Field[] fields = clz.getDeclaredFields();
+            boolean firstField = true;
             for (Field field : fields) {
-                String sField = StringUtils.EMPTY;
                 Object value;
-                String name = field.getName();
-                String strValue;
                 try {
                     field.setAccessible(true);
                     value = field.get(item);
+                    String strValue = formatValue(value);
+
+                    if (!firstField) {
+                        sb.append(",");
+                    }
+                    sb.append("\"").append(field.getName()).append("\":\"").append(strValue).append("\"");
+                    firstField = false;
+
                 } catch (IllegalArgumentException | IllegalAccessException e) {
-                    throw new RuntimeException(e);
+                    throw new RuntimeException("Error serializing field: " + field.getName(), e);
                 }
-
-                if (value instanceof Date) {
-                    LocalDate localDate = ((Date) value).toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-                    strValue = localDate.format(this.datetimeFormatter);
-                } else if (value instanceof BigDecimal || value instanceof Double || value instanceof Float) {
-                    strValue = this.decimalFormatter.format(value);
-                } else {
-                    strValue = value.toString();
-                }
-
-                if (!sJsonStr.toString().equals("{")) {
-                    sField = ",";
-                }
-                sField += "\"" + name + "\":\"" + strValue + "\"";
-
-                sJsonStr.append(sField);
             }
-            sJsonStr.append("}");
+            sb.append("}");
+        }
+    }
+
+    private String formatValue(Object value) {
+        if (value == null) {
+            return "null";
         }
 
-        return sJsonStr.toString();
+        if (value instanceof Date) {
+            LocalDate localDate = ((Date) value).toInstant()
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalDate();
+            return localDate.format(this.datetimeFormatter);
+        } else if (value instanceof BigDecimal || value instanceof Double || value instanceof Float) {
+            return this.decimalFormatter.format(value);
+        } else {
+            return value.toString().replace("\\", "\\\\").replace("\"", "\\\"");
+        }
     }
+
 }

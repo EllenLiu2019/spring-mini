@@ -45,12 +45,24 @@
     </bean>
 
     <!-- TODO: AOP -->
-    <!--<bean id="myBeforeAdvice" class="com.minis.test.aop.service.MyBeforeAdvice" />-->
+    <bean id="beforeAdvice" class="com.minis.test.aop.service.MyBeforeAdvice" />
+
     <bean id="tracingInterceptor" class="com.minis.aop.TracingInterceptor" />
+
+    <bean id="advisor" class="com.minis.aop.NameMatchMethodPointcutAdvisor">
+        <property type="com.minis.aop.Advice" name="advice" ref="beforeAdvice"/>
+        <property type="String" name="mappedName" value="do*"/>
+    </bean>
+
+
     <bean id="realAction" class="com.minis.test.aop.service.RealAction"/>
+    <bean id="anotherRealAction" class="com.minis.test.aop.service.AnotherRealAction"/>
+
     <bean id="action" class="com.minis.aop.ProxyFactoryBean">
         <property type="java.lang.Object" name="target" ref="realAction"/>
-        <property type="String" name="interceptorName" value="tracingInterceptor"/>
+        <property type="String" name="interceptorName" value="advisor"/>
     </bean>
+
+
 
 </beans>

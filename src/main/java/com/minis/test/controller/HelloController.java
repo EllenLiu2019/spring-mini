@@ -33,10 +33,12 @@ public class HelloController {
                 .format(date.toInstant().atZone(ZoneId.systemDefault()));
         return "doGet " + name + " says Hello on " + formattedDate;
     }
+
     @RequestMapping("/post")
     public String doPost(String name) {
         return "doPost() says I'm " + name;
     }
+
     @RequestMapping("/postBean")
     public String doTestBean(User user) {
         String formattedDate = DateTimeFormatter.ofPattern("yyyy-MM-dd")
@@ -53,26 +55,36 @@ public class HelloController {
         user.setBirthday(new Date());
         return user;
     }
+
     @RequestMapping("/test5")
     public void doTest5() {
         baseService.sayHello();
     }
+
     @RequestMapping("/test6")
     public User doTest6() {
         return userService.getUser(1);
     }
+
     @RequestMapping("/test7")
     public List<User> doTest7() {
         return userService.getUserByName("Alice");
     }
+
     @RequestMapping("/test8")
     public List<User> doTest8() {
-         return userService.getAllUsersByName("Alice");
+        return userService.getAllUsersByName("Alice");
     }
 
     @RequestMapping("/testaop")
     public void doTestAop(HttpServletRequest request, HttpServletResponse response) throws IOException {
         action.doAction();
-        response.getWriter().write("hello aop!");
+        response.getWriter().write("aop do actions");
+    }
+
+    @RequestMapping("/testaop2")
+    public void doTestAop2(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        action.doSomething();
+        response.getWriter().write("aop do somethings");
     }
 }
