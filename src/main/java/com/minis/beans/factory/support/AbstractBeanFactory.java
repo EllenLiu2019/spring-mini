@@ -3,6 +3,7 @@ package com.minis.beans.factory.support;
 import com.minis.beans.BeansException;
 import com.minis.beans.PropertyValue;
 import com.minis.beans.PropertyValues;
+import com.minis.beans.factory.FactoryBean;
 import com.minis.beans.factory.config.*;
 import com.minis.utils.ClassUtils;
 import com.minis.utils.StringUtils;
@@ -18,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry implements ConfigurableBeanFactory, BeanDefinitionRegistry {
+public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport implements ConfigurableBeanFactory, BeanDefinitionRegistry {
     private static final Logger LOGGER = LogManager.getLogger(AbstractBeanFactory.class);
     protected final Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<>();
     protected final List<String> beanDefinitionNames = new ArrayList<>();
@@ -30,23 +31,36 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
         if (singleton == null) {
             singleton = this.earlySingletonObjects.get(beanName);
             if (singleton == null) {
-                LOGGER.debug("Creating singleton bean '" + beanName + "'");
                 BeanDefinition beanDefinition = this.beanDefinitionMap.get(beanName);
-                if (beanDefinition != null && !beanDefinition.equals(StringUtils.EMPTY)) {
-                    singleton = creatBean(beanDefinition);
-                    this.registerSingleton(beanName, singleton);
-                    // TODO: postProcess Before Initialization
-                    applyBeanPostProcessorBeforeInitialization(singleton, beanName);
-                    // TODO: init-method
-                    if (beanDefinition.getInitMethodName() != null) {
-                        invokeInitMethod(beanDefinition, singleton);
-                    }
-                    // TODO: postProcess After Initialization
-                    applyBeanPostProcessorAfterInitialization(singleton, beanName);
+                if (beanDefinition == null || beanDefinition.equals(StringUtils.EMPTY)) {
+                    LOGGER.debug("bean definition not exit for {}", beanName);
+                    return null;
                 }
+                LOGGER.debug("NOT early exposed yet, creating singleton bean '" + beanName + "'");
+                singleton = creatBean(beanDefinition);
+                this.registerSingleton(beanName, singleton);
+                // TODO: postProcess Before Initialization
+                applyBeanPostProcessorBeforeInitialization(singleton, beanName);
+                // TODO: init-method
+                if (beanDefinition.getInitMethodName() != null) {
+                    invokeInitMethod(beanDefinition, singleton);
+                }
+                // TODO: postProcess After Initialization
+                applyBeanPostProcessorAfterInitialization(singleton, beanName);
             }
         }
+
+        if (singleton instanceof FactoryBean) {
+            LOGGER.debug("factory bean, start to get proxy for bean instance={}", beanName);
+            singleton = this.getObjectForBeanInstance(singleton, beanName);
+        }
+
         return singleton;
+    }
+
+    private Object getObjectForBeanInstance(Object singleton, String beanName) {
+        FactoryBean<?> factory = (FactoryBean<?>) singleton;
+        return getObjectFromFactoryBean(factory, beanName);
     }
 
     private void invokeInitMethod(BeanDefinition beanDef, Object singleton) {

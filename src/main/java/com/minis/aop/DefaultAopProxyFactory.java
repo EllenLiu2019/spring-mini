@@ -1,0 +1,12 @@
+package com.minis.aop;
+
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+public class DefaultAopProxyFactory implements AopProxyFactory {
+    @Override
+    public AopProxy createAopProxy(Object target) {
+        log.debug("creating JdkDynamicAopProxy using target={}", target);
+        return new JdkDynamicAopProxy(target);
+    }
+}

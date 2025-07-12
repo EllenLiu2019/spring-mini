@@ -55,8 +55,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
     public Object getBean(String beanName) throws ReflectiveOperationException, BeansException {
         Object result = super.getBean(beanName);
         if (result == null) {
+            LOGGER.debug("getting bean={} from IoC", beanName);
             result = this.parentBeanFactory.getBean(beanName);
-            LOGGER.debug("get bean {} from IoC", beanName);
+            LOGGER.debug("got bean={} from IoC, result={}", beanName, result.getClass());
         }
         return result;
     }

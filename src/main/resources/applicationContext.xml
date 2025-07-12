@@ -43,4 +43,11 @@
         <property type="String" name="password" value="deepblue123456"/>
         <property type="int" name="initialSize" value="3"/>
     </bean>
+
+    <!-- TODO: AOP -->
+    <bean id="realAction" class="com.minis.test.aop.service.RealAction"/>
+    <bean id="action" class="com.minis.aop.ProxyFactoryBean">
+        <property type="java.lang.Object" name="target" ref="realAction"/>
+    </bean>
+
 </beans>

@@ -1,12 +1,16 @@
 package com.minis.test.controller;
 
 import com.minis.beans.factory.annotation.Autowired;
+import com.minis.test.aop.service.IAction;
 import com.minis.test.ioc.BaseService;
 import com.minis.test.entity.User;
 import com.minis.test.jdbc.UserService;
 import com.minis.web.bind.annotation.RequestMapping;
 import com.minis.web.bind.annotation.ResponseBody;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
+import java.io.IOException;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
@@ -18,6 +22,10 @@ public class HelloController {
 
     @Autowired
     UserService userService;
+
+    @Autowired
+    IAction action;
+
     @RequestMapping("/get")
     public String doGet(Date date, String name) {
         String formattedDate = DateTimeFormatter
@@ -60,5 +68,11 @@ public class HelloController {
     @RequestMapping("/test8")
     public List<User> doTest8() {
          return userService.getAllUsersByName("Alice");
+    }
+
+    @RequestMapping("/testaop")
+    public void doTestAop(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        action.doAction();
+        response.getWriter().write("hello aop!");
     }
 }
