@@ -76,7 +76,6 @@ public class ProxyFactoryBean implements FactoryBean<Object>, BeanFactoryAware {
 
     private Object getSingletonInstance() {
         if (this.singletonInstance != null) {
-            log.debug("proxy instance={} exist, proxy Class={}", this.singletonInstance, this.singletonInstance.getClass());
             return this.singletonInstance;
         }
         log.debug("proxy not exist yet, getting proxy for target={}", target);

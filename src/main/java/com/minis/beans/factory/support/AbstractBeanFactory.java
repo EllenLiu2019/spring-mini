@@ -3,16 +3,12 @@ package com.minis.beans.factory.support;
 import com.minis.beans.BeansException;
 import com.minis.beans.PropertyValue;
 import com.minis.beans.PropertyValues;
-import com.minis.beans.factory.BeanFactoryAware;
 import com.minis.beans.factory.FactoryBean;
 import com.minis.beans.factory.config.*;
-import com.minis.utils.ClassUtils;
-import com.minis.utils.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,58 +24,21 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
     @Override
     public Object getBean(String beanName) throws BeansException, ReflectiveOperationException {
-        Object singleton = this.getSingleton(beanName);
-        if (singleton == null) {
-            singleton = this.earlySingletonObjects.get(beanName);
-            if (singleton == null) {
-                BeanDefinition beanDefinition = this.beanDefinitionMap.get(beanName);
-                if (beanDefinition == null || beanDefinition.equals(StringUtils.EMPTY)) {
-                    LOGGER.debug("bean definition not exit for {}", beanName);
-                    return null;
-                }
-                LOGGER.debug("NOT early exposed yet, creating singleton bean '" + beanName + "'");
-                singleton = creatBean(beanDefinition);
-                this.registerSingleton(beanName, singleton);
-
-                if (singleton instanceof BeanFactoryAware) {
-                    ((BeanFactoryAware) singleton).setBeanFactory(this);
-                }
-
-                // TODO: postProcess Before Initialization
-                applyBeanPostProcessorBeforeInitialization(singleton, beanName);
-                // TODO: init-method
-                if (beanDefinition.getInitMethodName() != null) {
-                    invokeInitMethod(beanDefinition, singleton);
-                }
-                // TODO: postProcess After Initialization
-                applyBeanPostProcessorAfterInitialization(singleton, beanName);
-            }
-        }
-
+        Object singleton = doGetBean(beanName);
         if (singleton instanceof FactoryBean) {
-            LOGGER.debug("factory bean, start to get proxy for bean instance={}", beanName);
             singleton = this.getObjectForBeanInstance(singleton, beanName);
         }
-
         return singleton;
     }
 
     private Object getObjectForBeanInstance(Object singleton, String beanName) {
-        FactoryBean<?> factory = (FactoryBean<?>) singleton;
-        return getObjectFromFactoryBean(factory, beanName);
-    }
+        Object object = getCachedObjectForFactoryBean(beanName);
+        if (object == null) {
+            FactoryBean<?> factory = (FactoryBean<?>) singleton;
+            object = getObjectFromFactoryBean(factory, beanName);
 
-    private void invokeInitMethod(BeanDefinition beanDef, Object singleton) {
-        Class<?> clazz = singleton.getClass();
-        String initMethodName = beanDef.getInitMethodName();
-        if (initMethodName != null && !initMethodName.isEmpty()) {
-            Method initMethod = ClassUtils.getMethod(clazz, initMethodName);
-            try {
-                initMethod.invoke(singleton);
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                throw new RuntimeException(e);
-            }
         }
+        return object;
     }
 
     public void refresh() {
@@ -91,8 +50,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
             }
         }
     }
-
-    private Object creatBean(BeanDefinition beanDefinition) {
+    protected Object creatBean(BeanDefinition beanDefinition) {
         Class<?> clz;
         Object obj;
         try {
@@ -245,8 +203,6 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
         return this.beanDefinitionMap.containsKey(name);
     }
 
-    public abstract Object applyBeanPostProcessorBeforeInitialization(Object existingBean, String beanName) throws BeansException, ReflectiveOperationException;
-
-    public abstract Object applyBeanPostProcessorAfterInitialization(Object existingBean, String beanName) throws BeansException;
+    protected abstract Object doGetBean(String beanName) throws ReflectiveOperationException, BeansException;
 
 }

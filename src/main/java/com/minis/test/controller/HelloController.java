@@ -24,7 +24,10 @@ public class HelloController {
     UserService userService;
 
     @Autowired
-    IAction action;
+    IAction realAction;
+
+    @Autowired
+    IAction anotherRealAction;
 
     @RequestMapping("/get")
     public String doGet(Date date, String name) {
@@ -78,13 +81,25 @@ public class HelloController {
 
     @RequestMapping("/testaop")
     public void doTestAop(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        action.doAction();
-        response.getWriter().write("aop do actions");
+        realAction.doAction();
+        response.getWriter().write("action do action");
     }
 
     @RequestMapping("/testaop2")
     public void doTestAop2(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        action.doSomething();
-        response.getWriter().write("aop do somethings");
+        realAction.doSomething();
+        response.getWriter().write("action do something");
+    }
+
+    @RequestMapping("/testaop3")
+    public void doTestAop3(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        anotherRealAction.doAction();
+        response.getWriter().write("another action do action");
+    }
+
+    @RequestMapping("/testaop4")
+    public void doTestAop4(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        anotherRealAction.doSomething();
+        response.getWriter().write("another action do something");
     }
 }

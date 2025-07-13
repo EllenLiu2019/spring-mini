@@ -1,5 +1,6 @@
 package com.minis.web.context.support;
 
+import com.minis.aop.framework.BeanNameAutoProxyCreator;
 import com.minis.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import com.minis.beans.factory.config.BeanDefinition;
 import com.minis.beans.factory.support.ConfigurableListableBeanFactory;
@@ -165,6 +166,7 @@ public class AnnotationConfigWebApplicationContext extends AbstractApplicationCo
     @Override
     public void registerBeanPostProcessors() {
         this.beanFactory.addBeanPostProcessor(new AutowiredAnnotationBeanPostProcessor());
+        this.beanFactory.addBeanPostProcessor(new BeanNameAutoProxyCreator());
     }
 
     @Override

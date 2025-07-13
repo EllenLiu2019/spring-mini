@@ -1,4 +1,6 @@
-package com.minis.aop;
+package com.minis.aop.support;
+
+import com.minis.aop.*;
 
 // TODO: 代替了 DefaultAdvisor， 新增了 pointcut 功能；即，批量匹配增强方法
 public class NameMatchMethodPointcutAdvisor implements PointcutAdvisor {

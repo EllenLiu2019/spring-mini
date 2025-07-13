@@ -3,6 +3,7 @@ package com.minis.context;
 import com.minis.beans.BeansException;
 import com.minis.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import com.minis.beans.factory.config.BeanFactoryPostProcessor;
+import com.minis.beans.factory.config.BeanPostProcessor;
 import com.minis.beans.factory.support.ConfigurableListableBeanFactory;
 import com.minis.beans.factory.support.DefaultListableBeanFactory;
 import com.minis.beans.factory.xml.XmlBeanDefinitionReader;
@@ -31,6 +32,13 @@ public class ClassPathXmlApplicationContext extends AbstractApplicationContext {
         log.debug("-------------> [IoC] webApplicationContext refresh END <-------------");
     }
 
+    @Override
+    // TODO: IoC beanFactory 与 Servlet beanFactory 是创建的两个（new DefaultListableBeanFactory()）
+    //  List<beanPostProcessor> beanPostProcessors 是 beanFactory 中的成员变量；
+    //  beanPostProcessors 在不同的 applicationContext 各自为政，互不干扰！
+    //  所以，这里会新 new 一个 postProcessor 放入 beanFactory；
+    //  否则 虽然是两个beanFactory, 但 使用了一个 postProcessor 的引用，
+    //  会导致同一个 postProcessor 同时在 两个 application context 中生效，不符合设计原则：职责单一
     public void registerBeanPostProcessors() {
         this.beanFactory.addBeanPostProcessor(new AutowiredAnnotationBeanPostProcessor());
     }

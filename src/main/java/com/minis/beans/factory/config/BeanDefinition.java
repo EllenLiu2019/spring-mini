@@ -11,10 +11,6 @@ public class BeanDefinition {
     static String SCOPE_PROTOTYPE = ConfigurableBeanFactory.SCOPE_PROTOTYPE;
     private String scope = SCOPE_SINGLETON;
 
-    public boolean isLazyInit() {
-        return lazyInit;
-    }
-
     private boolean lazyInit = false;
     private String[] dependsOn;
     private ConstructorArgumentValues constructorArgumentValues;
