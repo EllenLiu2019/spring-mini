@@ -50,8 +50,13 @@
     <bean id="tracingInterceptor" class="com.minis.aop.TracingInterceptor" />
 
     <bean id="advisor" class="com.minis.aop.support.NameMatchMethodPointcutAdvisor">
-        <property type="com.minis.aop.Advice" name="advice" ref="beforeAdvice"/>
+        <property type="com.minis.aop.Advice" name="advice" ref="transactionInterceptor"/>
         <property type="String" name="mappedName" value="do*"/>
     </bean>
+
+    <bean id="transactionInterceptor" class="com.minis.tx.interceptor.TransactionInterceptor" >
+        <property type="com.minis.tx.transaction.TransactionManager" name="txManager" ref="txManager" />
+    </bean>
+    <bean id="txManager" class="com.minis.tx.transaction.TransactionManager"/>
 
 </beans>
