@@ -1,6 +1,6 @@
 package com.minis.web.context.support;
 
-import com.minis.aop.framework.BeanNameAutoProxyCreator;
+import com.minis.aop.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator;
 import com.minis.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import com.minis.beans.factory.config.BeanDefinition;
 import com.minis.beans.factory.support.ConfigurableListableBeanFactory;

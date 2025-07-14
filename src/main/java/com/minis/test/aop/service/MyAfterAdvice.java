@@ -1,6 +1,6 @@
 package com.minis.test.aop.service;
 
-import com.minis.aop.AfterReturningAdvice;
+import com.minis.aop.springframework.aop.AfterReturningAdvice;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Method;

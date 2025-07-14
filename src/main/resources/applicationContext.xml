@@ -47,10 +47,10 @@
     <!-- TODO: AOP -->
     <bean id="beforeAdvice" class="com.minis.test.aop.service.MyBeforeAdvice" />
 
-    <bean id="tracingInterceptor" class="com.minis.aop.TracingInterceptor" />
+    <bean id="tracingInterceptor" class="com.minis.aop.springframework.aop.interceptor.TracingInterceptor" />
 
-    <bean id="advisor" class="com.minis.aop.support.NameMatchMethodPointcutAdvisor">
-        <property type="com.minis.aop.Advice" name="advice" ref="transactionInterceptor"/>
+    <bean id="advisor" class="com.minis.aop.springframework.aop.support.NameMatchMethodPointcutAdvisor">
+        <property type="com.minis.aop.aopalliance.aop.Advice" name="advice" ref="transactionInterceptor"/>
         <property type="String" name="mappedName" value="do*"/>
     </bean>
 
