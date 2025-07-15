@@ -2,7 +2,9 @@ package com.minis.aop.springframework.aop.framework;
 
 import com.minis.aop.aopalliance.intercept.MethodInterceptor;
 import com.minis.aop.aopalliance.intercept.MethodInvocation;
+import com.minis.aop.springframework.aop.Advisor;
 import com.minis.aop.springframework.aop.PointcutAdvisor;
+import com.minis.scheduling.annotation.AsyncAnnotationAdvisor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.InvocationHandler;
@@ -14,29 +16,36 @@ import java.lang.reflect.Proxy;
 @Slf4j
 public class JdkDynamicAopProxy implements AopProxy, InvocationHandler {
     private final Object target;
-    private final PointcutAdvisor advisor;
+    private final Advisor advisor;
 
-    public JdkDynamicAopProxy(Object target, PointcutAdvisor advisor) {
+    public JdkDynamicAopProxy(Object target, Advisor advisor) {
         this.target = target;
         this.advisor = advisor;
     }
 
     @Override
     public Object getProxy() {
-        log.debug("creating proxy instance for target={}", target);
-        Object obj = Proxy.newProxyInstance(JdkDynamicAopProxy.class.getClassLoader(), target.getClass().getInterfaces(), this);
-        log.debug("proxy instance={} created", obj.getClass());
-        return obj;
+        return Proxy.newProxyInstance(JdkDynamicAopProxy.class.getClassLoader(), target.getClass().getInterfaces(), this);
     }
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         Class<?> targetClass = target != null ? target.getClass() : null;
-        if (this.advisor.getPointcut().getMethodMatcher().matches(method, targetClass)) {
-            MethodInterceptor interceptor = advisor.getMethodInterceptor();
-            MethodInvocation methodInvocation = new ReflectiveMethodInvocation(proxy, target, method, args);
-            return interceptor.invoke(methodInvocation);
+        MethodInterceptor interceptor = advisor.getMethodInterceptor();
+        MethodInvocation invocation = new ReflectiveMethodInvocation(proxy, target, method, args);
+
+        if (this.advisor instanceof PointcutAdvisor pointcutAdvisor) {
+            if (pointcutAdvisor.getPointcut().getMethodMatcher().matches(method, targetClass)) {
+                return interceptor.invoke(invocation);
+            }
         }
+
+        if (this.advisor instanceof AsyncAnnotationAdvisor) {
+            Object result = interceptor.invoke(invocation);
+            log.info("invoke finished, result = {}", result);
+            return result;
+        }
+
         return null;
     }
 

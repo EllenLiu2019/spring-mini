@@ -6,6 +6,7 @@ import com.minis.beans.factory.config.BeanDefinition;
 import com.minis.beans.factory.support.ConfigurableListableBeanFactory;
 import com.minis.beans.factory.support.DefaultListableBeanFactory;
 import com.minis.context.*;
+import com.minis.scheduling.annotation.AsyncAnnotationBeanPostProcessor;
 import com.minis.web.context.WebApplicationContext;
 import jakarta.servlet.ServletContext;
 import lombok.extern.slf4j.Slf4j;
@@ -167,6 +168,7 @@ public class AnnotationConfigWebApplicationContext extends AbstractApplicationCo
     public void registerBeanPostProcessors() {
         this.beanFactory.addBeanPostProcessor(new AutowiredAnnotationBeanPostProcessor());
         this.beanFactory.addBeanPostProcessor(new BeanNameAutoProxyCreator());
+        this.beanFactory.addBeanPostProcessor(new AsyncAnnotationBeanPostProcessor());
     }
 
     @Override

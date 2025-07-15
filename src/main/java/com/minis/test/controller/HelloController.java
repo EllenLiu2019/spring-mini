@@ -5,17 +5,19 @@ import com.minis.test.aop.service.IAction;
 import com.minis.test.ioc.BaseService;
 import com.minis.test.entity.User;
 import com.minis.test.jdbc.UserService;
+import com.minis.test.scheduling.IService;
 import com.minis.web.bind.annotation.RequestMapping;
 import com.minis.web.bind.annotation.ResponseBody;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
-
+@Slf4j
 public class HelloController {
     @Autowired
     BaseService baseService;
@@ -28,6 +30,9 @@ public class HelloController {
 
     @Autowired
     IAction anotherRealAction;
+
+    @Autowired
+    IService iServiceImpl;
 
     @RequestMapping("/get")
     public String doGet(Date date, String name) {
@@ -61,7 +66,7 @@ public class HelloController {
 
     @RequestMapping("/test5")
     public void doTest5() {
-        baseService.sayHello();
+        baseService.getBaseBaseService().getAService().sayHello();
     }
 
     @RequestMapping("/test6")
@@ -101,5 +106,19 @@ public class HelloController {
     public void doTestAop4(HttpServletRequest request, HttpServletResponse response) throws IOException {
         anotherRealAction.doSomething();
         response.getWriter().write("another action do something");
+    }
+
+    @RequestMapping("/testaopthread")
+    public String doTestAopThread() {
+        iServiceImpl.greeting4Score()
+                .addCallback(result -> log.info("callback: executed success, obtained 10 scores."),
+                        result -> log.error("callback: got failure for error = {}, returned 2 scores.", result, result));
+        return "greeting sending out";
+    }
+
+    @RequestMapping("/testaopthread2")
+    public void doTestAopThread2() {
+        iServiceImpl.greetingException().addCallback(result -> log.info("callback: executed success, obtained 10 scores."),
+                result -> log.error("callback: got failure for error = {}, returned 2 scores.", result, result));
     }
 }

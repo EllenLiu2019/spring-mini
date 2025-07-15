@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <beans>
     <bean id="baseBaseService" class="com.minis.test.ioc.BaseBaseService" init-method="init">
-        <property type="com.minis.test.ioc.AServiceImpl" name="as" ref="aService"/>
+        <property type="com.minis.test.ioc.AServiceImpl" name="aService" ref="aService"/>
     </bean>
 
     <bean id="aService" class="com.minis.test.ioc.AServiceImpl">
@@ -59,4 +59,22 @@
     </bean>
     <bean id="txManager" class="com.minis.tx.transaction.TransactionManager"/>
 
+
+    <!-- TODO: thread pool -->
+    <bean id="executor" class="com.minis.scheduling.concurrent.ThreadPoolTaskExecutor">
+        <property type="int" name="corePoolSize" value="2"/>
+        <property type="int" name="maxPoolSize" value="4"/>
+        <property type="int" name="queueCapacity" value="2"/>
+        <property type="int" name="keepAliveSeconds" value="60"/>
+    </bean>
+
+    <bean id="asyncInterceptor" class="com.minis.aop.springframework.aop.interceptor.AsyncExecutionInterceptor">
+        <property type="com.minis.scheduling.concurrent.ThreadPoolTaskExecutor" name="executor" ref="executor"/>
+    </bean>
+
+    <bean id="asyncAnnotationAdvisor" class="com.minis.scheduling.annotation.AsyncAnnotationAdvisor">
+        <property type="com.minis.aop.springframework.aop.interceptor.AsyncExecutionInterceptor"
+                  name="methodInterceptor"
+                  ref="asyncInterceptor"/>
+    </bean>
 </beans>

@@ -1,6 +1,6 @@
 package com.minis.aop.springframework.aop.framework;
 
-import com.minis.aop.springframework.aop.PointcutAdvisor;
+import com.minis.aop.springframework.aop.Advisor;
 import com.minis.beans.BeansException;
 import com.minis.beans.factory.BeanFactory;
 import com.minis.beans.factory.BeanFactoryAware;
@@ -40,7 +40,7 @@ public class ProxyFactoryBean implements FactoryBean<Object>, BeanFactoryAware {
     private BeanFactory beanFactory;
     @Setter
     private String interceptorName; // TODO: beanName, used to invoke getBean("interceptorName")
-    private PointcutAdvisor advisor;
+    private Advisor advisor;
 
     public ProxyFactoryBean() {
         this.aopProxyFactory = new DefaultAopProxyFactory();
@@ -55,15 +55,7 @@ public class ProxyFactoryBean implements FactoryBean<Object>, BeanFactoryAware {
         //MethodInterceptor interceptor = null;
         try {
             advice = this.beanFactory.getBean(this.interceptorName);
-            /*if (advice instanceof BeforeAdvice) {
-                interceptor = new MethodBeforeAdviceInterceptor((MethodBeforeAdvice) advice);
-            } else if (advice instanceof AfterAdvice) {
-                interceptor = new AfterReturningAdviceInterceptor((AfterReturningAdvice) advice);
-            } else if (advice instanceof MethodInterceptor) {
-                interceptor = (MethodInterceptor) advice;
-            }
-            advisor.setMethodInterceptor(interceptor);*/
-            this.advisor = (PointcutAdvisor) advice;
+            this.advisor = (Advisor) advice;
         } catch (BeansException | ReflectiveOperationException e) {
             throw new RuntimeException(e);
         }
@@ -79,23 +71,15 @@ public class ProxyFactoryBean implements FactoryBean<Object>, BeanFactoryAware {
         if (this.singletonInstance != null) {
             return this.singletonInstance;
         }
+
         log.debug("proxy not exist yet, getting proxy for target={}", target);
+
         AopProxy aopProxy = this.aopProxyFactory.createAopProxy(target, advisor);
         this.singletonInstance = aopProxy.getProxy();
-        log.debug("got proxy instance for target={}, singletonInstance={}, beanClass={}",
-                target, singletonInstance, singletonInstance.getClass());
-        /*AopProxy aopProxy = createAopProxy();
-        this.singletonInstance = getProxy(aopProxy);*/
+
+        log.debug("got proxy instance for target={}, beanClass={}", target, singletonInstance.getClass());
         return singletonInstance;
     }
-
-    /*protected AopProxy createAopProxy() {
-        return this.aopProxyFactory.createAopProxy(target);
-    }
-
-    protected Object getProxy(AopProxy aopProxy) {
-        return aopProxy.getProxy();
-    }*/
 
     @Override
     public Class<?> getObjectType() {

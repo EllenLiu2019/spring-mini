@@ -4,7 +4,6 @@ import com.minis.beans.BeansException;
 import com.minis.beans.factory.BeanFactoryAware;
 import com.minis.beans.factory.config.BeanDefinition;
 import com.minis.beans.factory.config.BeanPostProcessor;
-import com.minis.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import com.minis.utils.ClassUtils;
 import com.minis.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -49,40 +48,21 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
                     ((BeanFactoryAware) singleton).setBeanFactory(this);
                 }
 
-                Object proxy = resolveBeforeInstantiation(beanName, singleton);
-
-                if (proxy != singleton) {
-                    this.registerSingleton(beanName, proxy);
-                    return proxy;
-                }
-
                 // TODO: postProcess Before Initialization
                 singleton = applyBeanPostProcessorBeforeInitialization(singleton, beanName);
+
                 // TODO: init-method
                 if (beanDefinition.getInitMethodName() != null) {
                     invokeInitMethod(beanDefinition, singleton);
                 }
                 // TODO: postProcess After Initialization
                 applyBeanPostProcessorAfterInitialization(singleton, beanName);
+
+                this.removeSingleton(beanName);
+                this.registerSingleton(beanName, singleton);
             }
         }
         return singleton;
-    }
-
-    protected Object resolveBeforeInstantiation(String beanName, Object obj) {
-        Object bean;
-        try {
-            // TODO: 实例化（Instantiation）前置处理
-            bean = applyBeanPostProcessorsBeforeInstantiation(obj, beanName);
-            if (bean != null) {
-                // TODO: 初始化（Initialization）后置处理
-                return applyBeanPostProcessorsAfterInitialization(bean, beanName);
-            } else {
-                return obj;
-            }
-        } catch (BeansException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     void invokeInitMethod(BeanDefinition beanDef, Object singleton) {
@@ -131,23 +111,5 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         }
         return result;
     }
-
-    protected Object applyBeanPostProcessorsBeforeInstantiation(Object obj, String beanName) throws BeansException {
-        for (BeanPostProcessor bp : getBeanPostProcessors()) {
-            if (bp instanceof InstantiationAwareBeanPostProcessor) {
-                InstantiationAwareBeanPostProcessor ibp = (InstantiationAwareBeanPostProcessor) bp;
-                Object result = ibp.postProcessBeforeInstantiation(obj, beanName);
-                if (result != null) {
-                    return result;
-                }
-            }
-        }
-        return null;
-    }
-
-    protected Object applyBeanPostProcessorsAfterInitialization(Object bean, String beanName) {
-        return bean;
-    }
-
 
 }
