@@ -52,4 +52,10 @@ public class PropertyValues {
     public boolean isEmpty() {
         return this.propertyValueList.isEmpty();
     }
+
+
+    public void add(String propertyName, Object propertyValue) {
+        this.propertyValueList.add(new PropertyValue(propertyName, propertyValue));
+    }
+
 }

@@ -1,4 +1,6 @@
-package com.minis.context;
+package com.minis.context.event;
+
+import com.minis.context.event.ApplicationContextEvent;
 
 public class ContextRefreshedEvent extends ApplicationContextEvent {
     private static final long serialVersionUID = 1L;

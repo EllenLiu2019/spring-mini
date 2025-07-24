@@ -1,6 +1,8 @@
-package com.minis.context;
+package com.minis.context.event;
 
-public abstract class ApplicationContextEvent extends ApplicationEvent{
+import com.minis.context.ApplicationContext;
+
+public abstract class ApplicationContextEvent extends ApplicationEvent {
     /**
      * Constructs a prototypical Event.
      *

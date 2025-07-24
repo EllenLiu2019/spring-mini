@@ -2,6 +2,7 @@ package com.minis.beans.factory.annotation;
 
 import com.minis.beans.factory.BeanFactory;
 import com.minis.beans.BeansException;
+import com.minis.beans.factory.BeanFactoryAware;
 import com.minis.beans.factory.config.BeanPostProcessor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -12,7 +13,7 @@ import java.lang.reflect.Field;
 //  该类实现 BeanPostProcessor 接口
 //  方法：postProcessBeforeInitialization
 //  主要用途：1. 扫描类中所有带 @Autowired 注解的属性，并设置属性值
-public class AutowiredAnnotationBeanPostProcessor implements BeanPostProcessor {
+public class AutowiredAnnotationBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware {
     private static final Logger LOGGER = LogManager.getLogger(AutowiredAnnotationBeanPostProcessor.class.getName());
     private BeanFactory beanFactory;
     @Override

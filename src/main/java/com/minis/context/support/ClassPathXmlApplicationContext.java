@@ -1,12 +1,15 @@
-package com.minis.context;
+package com.minis.context.support;
 
 import com.minis.beans.BeansException;
 import com.minis.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import com.minis.beans.factory.config.BeanFactoryPostProcessor;
-import com.minis.beans.factory.config.BeanPostProcessor;
 import com.minis.beans.factory.support.ConfigurableListableBeanFactory;
 import com.minis.beans.factory.support.DefaultListableBeanFactory;
 import com.minis.beans.factory.xml.XmlBeanDefinitionReader;
+import com.minis.context.*;
+import com.minis.context.event.ApplicationEvent;
+import com.minis.context.event.ApplicationListener;
+import com.minis.context.event.ContextRefreshedEvent;
 import com.minis.core.ClassPathXmlResource;
 import lombok.extern.slf4j.Slf4j;
 
@@ -91,6 +94,11 @@ public class ClassPathXmlApplicationContext extends AbstractApplicationContext {
     @Override
     public void addBeanFactoryPostProcessor(BeanFactoryPostProcessor postProcessor) {
         this.beanFactoryPostProcessors.add(postProcessor);
+    }
+
+    @Override
+    protected void refreshBeanFactory() throws IllegalStateException {
+
     }
 
     @Override

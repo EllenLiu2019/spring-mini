@@ -1,11 +1,9 @@
 package com.minis.test.listener;
 
 import com.minis.context.ApplicationContext;
-import com.minis.context.ApplicationListener;
-import com.minis.context.ContextRefreshedEvent;
+import com.minis.context.event.ApplicationListener;
+import com.minis.context.event.ContextRefreshedEvent;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 @Slf4j
 public class ServletContextListener implements ApplicationListener<ContextRefreshedEvent> {

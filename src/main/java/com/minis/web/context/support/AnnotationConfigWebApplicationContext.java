@@ -6,6 +6,10 @@ import com.minis.beans.factory.config.BeanDefinition;
 import com.minis.beans.factory.support.ConfigurableListableBeanFactory;
 import com.minis.beans.factory.support.DefaultListableBeanFactory;
 import com.minis.context.*;
+import com.minis.context.event.ApplicationEvent;
+import com.minis.context.event.ApplicationListener;
+import com.minis.context.event.ContextRefreshedEvent;
+import com.minis.context.support.AbstractApplicationContext;
 import com.minis.scheduling.annotation.AsyncAnnotationBeanPostProcessor;
 import com.minis.web.context.WebApplicationContext;
 import jakarta.servlet.ServletContext;
@@ -158,6 +162,11 @@ public class AnnotationConfigWebApplicationContext extends AbstractApplicationCo
     public void initApplicationEventPublisher() {
         ApplicationEventPublisher aep = new SimpleApplicationEventPublisher();
         this.setApplicationEventPublisher(aep);
+    }
+
+    @Override
+    protected void refreshBeanFactory() throws IllegalStateException {
+
     }
 
     @Override

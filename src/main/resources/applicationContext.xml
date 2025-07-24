@@ -31,7 +31,7 @@
         <property type="String" name="decimalFormat" value="###.##"/>
     </bean>
 
-    <bean id="contextListener" class="com.minis.context.DefaultContextListener" />
+    <bean id="contextListener" class="com.minis.context.event.DefaultContextListener" />
 
     <bean id="jdbcTemplate" class="com.minis.jdbc.core.JdbcTemplate" />
     <bean id="dataSource" class="com.minis.jdbc.pool.PooledDataSource">

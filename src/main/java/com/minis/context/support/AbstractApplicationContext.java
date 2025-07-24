@@ -1,9 +1,14 @@
-package com.minis.context;
+package com.minis.context.support;
 
 import com.minis.beans.BeansException;
+import com.minis.beans.factory.BeanFactory;
 import com.minis.beans.factory.config.BeanFactoryPostProcessor;
 import com.minis.beans.factory.config.BeanPostProcessor;
 import com.minis.beans.factory.support.ConfigurableListableBeanFactory;
+import com.minis.context.ApplicationContext;
+import com.minis.context.ApplicationContextAware;
+import com.minis.context.ApplicationEventPublisher;
+import com.minis.context.ConfigurableApplicationContext;
 import com.minis.core.env.Environment;
 
 import java.util.ArrayList;
@@ -11,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public abstract class AbstractApplicationContext implements ApplicationContext {
+public abstract class AbstractApplicationContext implements ConfigurableApplicationContext {
     private Environment environment;
     private final List<BeanFactoryPostProcessor> beanFactoryPostProcessors = new ArrayList<>();
     private long startupDate;
@@ -50,12 +55,71 @@ public abstract class AbstractApplicationContext implements ApplicationContext {
     }
 
     public void refresh() {
-        postProcessBeanFactory(getBeanFactory());
-        registerBeanPostProcessors();
-        initApplicationEventPublisher();
-        onRefresh();
-        registerListeners();
-        finishRefresh();
+        ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
+        try {
+            postProcessBeanFactory(beanFactory);
+
+            // TODO:
+            //  getBean 并 invoke beanFactory processors：
+            //  eg: 1. ConfigurationClassPostProcessor: 通过注册的 configuration classes 获得更多的 bean definitions，
+            //           包含：实例化 @import 的类 AutoConfigurationImportSelector.class，
+            //           加载 @AutoConfiguration 拼接的文件：META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports
+            //      2. AopAutoConfiguration#ClassProxyingConfiguration: 注册 proxy creator 的 beanDefinition
+            //  带有 @Configuration 的配置类，会被替换为 cglib 的 proxy
+            //  带有 @Async 的类，会被替换为 jdk 的 proxy ？
+            invokeBeanFactoryPostProcessors(beanFactory);
+
+            // TODO: Register bean processors that intercept bean creation.
+            //  注册 bean processors: 实例化 beanDefinition 注册中心中注册的 postProcessor beans
+            //  并放入 beanFactory 的成员变量 List<BeanPostProcessor> beanPostProcessors
+            //  eg. CommonAnnotationBeanPostProcessor
+            //      AutowiredAnnotationBeanPostProcessor
+            registerBeanPostProcessors();
+
+            initApplicationEventPublisher();
+
+            // TODO: start tomcat server
+            onRefresh();
+
+            // TODO: Instantiate all remaining (non-lazy-init) singletons.
+            //  过程中会调用 bean processors 处理 实例化后的 bean
+            finishBeanFactoryInitialization(beanFactory);
+
+            registerListeners();
+
+            // Last step: publish corresponding event.
+            finishRefresh();
+        } catch (ReflectiveOperationException | BeansException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void invokeBeanFactoryPostProcessors(ConfigurableListableBeanFactory beanFactory) throws ReflectiveOperationException, BeansException {
+        PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors(beanFactory);
+    }
+
+    private ConfigurableListableBeanFactory obtainFreshBeanFactory() {
+        refreshBeanFactory();
+        return getBeanFactory();
+    }
+
+    //---------------------------------------------------------------------
+    // Abstract methods that must be implemented by subclasses
+    //---------------------------------------------------------------------
+
+    /**
+     * Subclasses must implement this method to perform the actual configuration load.
+     * The method is invoked by {@link #refresh()} before any other initialization work.
+     * <p>A subclass will either create a new bean factory and hold a reference to it,
+     * or return a single BeanFactory instance that it holds. In the latter case, it will
+     * usually throw an IllegalStateException if refreshing the context more than once.
+     * @throws BeansException if initialization of the bean factory failed
+     * @throws IllegalStateException if already initialized and multiple refresh
+     * attempts are not supported
+     */
+    protected abstract void refreshBeanFactory() throws IllegalStateException;
+    public void finishBeanFactoryInitialization(ConfigurableListableBeanFactory beanFactory) {
+        beanFactory.preInstantiateSingletons();
     }
 
     public abstract void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory);
@@ -64,7 +128,10 @@ public abstract class AbstractApplicationContext implements ApplicationContext {
 
     public abstract void initApplicationEventPublisher();
 
-    public abstract void onRefresh();
+    protected void onRefresh() {
+    }
+
+    ;
 
     public abstract void registerListeners();
 

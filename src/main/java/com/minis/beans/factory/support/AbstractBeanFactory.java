@@ -50,14 +50,17 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
             }
         }
     }
-    protected Object creatBean(BeanDefinition beanDefinition) {
+
+    protected Object creatBean(String beanName, BeanDefinition beanDefinition) {
         Class<?> clz;
         Object obj;
         try {
             obj = doCreateBean(beanDefinition);
-            this.earlySingletonObjects.put(beanDefinition.getId(), obj);
 
-            clz = Class.forName(beanDefinition.getClassName());
+            this.earlySingletonObjects.put(beanName, obj);
+
+            String beanClassName = beanDefinition.getBeanClassName() != null ? beanDefinition.getBeanClassName() : beanDefinition.getId();
+            clz = Class.forName(beanClassName);
 
             populateBean(beanDefinition, clz, obj);
         } catch (ReflectiveOperationException e) {
@@ -68,11 +71,12 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
     //TODO: handle constructor arguments
     private Object doCreateBean(BeanDefinition bd) throws ReflectiveOperationException {
-        LOGGER.debug("creating Bean for: id = {}, classname = {}", bd.getId(), bd.getClassName());
+        String beanClassName = bd.getBeanClassName() != null ? bd.getBeanClassName() : bd.getClassName();
+        LOGGER.debug("creating Bean for: id = {}, classname = {}", bd.getId(), beanClassName);
         Class<?> clz;
         Object obj;
         Constructor<?> con;
-        clz = Class.forName(bd.getClassName());
+        clz = Class.forName(beanClassName);
         ConstructorArgumentValues conArgValues = bd.getConstructorArgumentValues();
         if (conArgValues != null && !conArgValues.isEmpty()) {
             Class[] paramTypes = new Class[conArgValues.getArgumentCount()];
@@ -88,18 +92,22 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
                 } else if ("int".equals(conArgValue.getType())) {
                     paramTypes[i] = int.class;
                     paramValues[i] = Integer.valueOf((String) conArgValue.getValue());
+                } else if ("String[]".equals(conArgValue.getType())) {
+                    paramTypes[i] = String[].class;
+                    paramValues[i] = conArgValue.getValue();
                 } else {
                     paramTypes[i] = String.class;
                     paramValues[i] = conArgValue.getValue();
                 }
             }
-            con = clz.getConstructor(paramTypes);
+            con = clz.getDeclaredConstructor(paramTypes);
+            con.setAccessible(true);
             obj = con.newInstance(paramValues);
         } else {
             obj = clz.getConstructor().newInstance();
         }
 
-        LOGGER.debug("bean created: id = {}, className = {}, obj = {}", bd.getId(), bd.getClassName(), obj);
+        LOGGER.debug("bean created: id = {}, className = {}, obj = {}", bd.getId(), beanClassName, obj);
 
         return obj;
     }

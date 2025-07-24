@@ -1,6 +1,5 @@
 package com.minis.context;
 
-import com.minis.beans.factory.config.BeanFactoryPostProcessor;
 import com.minis.beans.factory.support.ConfigurableBeanFactory;
 import com.minis.beans.factory.support.ConfigurableListableBeanFactory;
 import com.minis.beans.factory.support.ListableBeanFactory;
@@ -12,8 +11,8 @@ public interface ApplicationContext extends EnvironmentCapable, ListableBeanFact
     long getStartupDate();
     ConfigurableListableBeanFactory getBeanFactory() throws IllegalStateException;
     void setEnvironment(Environment environment);
-    void addBeanFactoryPostProcessor(BeanFactoryPostProcessor beanPostProcessor);
-    void refresh();
+    //void addBeanFactoryPostProcessor(BeanFactoryPostProcessor beanPostProcessor);
+    //void refresh();
     void close();
     boolean isActive();
 }

@@ -30,9 +30,17 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
         List<String> result = new ArrayList<>();
         for (String beanName : this.beanDefinitionNames) {
             BeanDefinition beanDefinition = this.getBeanDefinition(beanName);
-            Class<?> classToMatch = beanDefinition.getClass();
-            if (type.isAssignableFrom(classToMatch)) {
-                result.add(beanName);
+            Class<?> classToMatch;
+            try {
+                String beanClassName = beanDefinition.getBeanClassName();
+                if (beanClassName == null) {
+                    beanClassName = beanDefinition.getClassName();
+                }
+                classToMatch = Class.forName(beanClassName);
+                if (type.isAssignableFrom(classToMatch)) {
+                    result.add(beanName);
+                }
+            } catch (ClassNotFoundException ignored) {
             }
         }
         return result.toArray(new String[0]);
@@ -54,11 +62,23 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
     @Override
     public Object getBean(String beanName) throws ReflectiveOperationException, BeansException {
         Object result = super.getBean(beanName);
-        if (result == null) {
+        if (result == null && this.parentBeanFactory != null) {
             LOGGER.debug("getting bean={} from IoC", beanName);
             result = this.parentBeanFactory.getBean(beanName);
             LOGGER.debug("got bean={} from IoC, result={}", beanName, result.getClass());
         }
         return result;
+    }
+
+    @Override
+    public void preInstantiateSingletons() {
+        List<String> beanNames = new ArrayList<>(this.beanDefinitionNames);
+        try {
+            for (String beanName : beanNames) {
+                getBean(beanName);
+            }
+        } catch (ReflectiveOperationException | BeansException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

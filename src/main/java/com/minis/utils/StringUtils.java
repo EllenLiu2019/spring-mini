@@ -1321,4 +1321,12 @@ public abstract class StringUtils {
 		return arrayToDelimitedString(arr, ",");
 	}
 
+    public static String uncapitalizeAsProperty(String str) {
+		if (!hasLength(str) || (str.length() > 1 && Character.isUpperCase(str.charAt(0)) &&
+				Character.isUpperCase(str.charAt(1)))) {
+			return str;
+		}
+		return changeFirstCharacterCase(str, false);
+    }
+
 }

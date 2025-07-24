@@ -2,7 +2,7 @@ package com.minis.test.ioc;
 
 
 import com.minis.beans.BeansException;
-import com.minis.context.ClassPathXmlApplicationContext;
+import com.minis.context.support.ClassPathXmlApplicationContext;
 
 public class Test1 {
     public static void main(String[] args) throws BeansException, ReflectiveOperationException {

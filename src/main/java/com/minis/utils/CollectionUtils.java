@@ -16,6 +16,8 @@
 
 package com.minis.utils;
 
+import com.minis.context.annotation.ConfigurationClass;
+
 import java.util.*;
 
 
@@ -29,6 +31,8 @@ import java.util.*;
  * @since 1.1.3
  */
 public abstract class CollectionUtils {
+
+	static final float DEFAULT_LOAD_FACTOR = 0.75f;
 
 	/**
 	 * Return {@code true} if the supplied Collection is {@code null} or empty.
@@ -404,7 +408,15 @@ public abstract class CollectionUtils {
 		return (enumeration != null ? new EnumerationIterator<>(enumeration) : Collections.emptyIterator());
 	}
 
-	/**
+    public static Set<ConfigurationClass> newHashSet(int expectedSize) {
+		return new HashSet<>(computeInitialCapacity(expectedSize), DEFAULT_LOAD_FACTOR);
+    }
+
+	private static int computeInitialCapacity(int expectedSize) {
+		return (int) Math.ceil(expectedSize / (double) DEFAULT_LOAD_FACTOR);
+	}
+
+    /**
 	 * Iterator wrapping an Enumeration.
 	 */
 	private static class EnumerationIterator<E> implements Iterator<E> {
@@ -429,6 +441,10 @@ public abstract class CollectionUtils {
 		public void remove() throws UnsupportedOperationException {
 			throw new UnsupportedOperationException("Not supported");
 		}
+	}
+
+	public static <E> LinkedHashSet<E> newLinkedHashSet(int expectedSize) {
+		return new LinkedHashSet<>(computeInitialCapacity(expectedSize), DEFAULT_LOAD_FACTOR);
 	}
 
 

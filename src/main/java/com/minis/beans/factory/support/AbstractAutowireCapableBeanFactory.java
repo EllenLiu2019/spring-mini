@@ -21,6 +21,7 @@ import java.util.Map;
 public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory implements AutowireCapableBeanFactory {
     private final List<BeanPostProcessor> beanPostProcessors = new ArrayList<>();
     private final Map<String, Object> earlySingletonObjects = new HashMap<>(16);
+    private boolean allowCircularReferences;
 
     @Override
     public void addBeanPostProcessor(BeanPostProcessor beanPostProcessor) {
@@ -40,7 +41,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
                 }
                 log.debug("NOT early exposed yet, creating singleton bean '" + beanName + "'");
 
-                singleton = creatBean(beanDefinition);
+                singleton = creatBean(beanName, beanDefinition);
 
                 this.registerSingleton(beanName, singleton);
 
@@ -112,4 +113,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         return result;
     }
 
+    public void setAllowCircularReferences(boolean allowCircularReferences) {
+        this.allowCircularReferences = allowCircularReferences;
+    }
 }

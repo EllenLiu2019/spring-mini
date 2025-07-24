@@ -4,7 +4,12 @@ import com.minis.beans.factory.BeanFactory;
 import com.minis.beans.BeansException;
 
 public interface BeanPostProcessor {
-    Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException, ReflectiveOperationException;
-    Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException;
-    void setBeanFactory(BeanFactory beanFactory);
+    default Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException, ReflectiveOperationException {
+        return bean;
+    }
+    default Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+        return bean;
+    }
+    default void setBeanFactory(BeanFactory beanFactory) {
+    }
 }

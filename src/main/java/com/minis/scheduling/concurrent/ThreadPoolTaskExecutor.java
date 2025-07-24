@@ -1,8 +1,6 @@
 package com.minis.scheduling.concurrent;
 
-import com.minis.scheduling.FailureCallback;
 import com.minis.scheduling.ListenableFuture;
-import com.minis.scheduling.SuccessCallback;
 import com.minis.scheduling.support.ListenableFutureTask;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;

@@ -1,0 +1,14 @@
+com.minis.web.servlet.RequestMappingHandlerAdapter
+com.minis.web.servlet.RequestMappingHandlerMapping
+com.minis.web.servlet.DispatcherServlet
+com.minis.boot.web.embedded.TomcatServletWebServerFactory
+org.springframework.boot.autoconfigure.web.embedded.EmbeddedWebServerFactoryCustomizerAutoConfiguration
+org.springframework.boot.autoconfigure.web.servlet.DispatcherServletAutoConfiguration
+org.springframework.boot.autoconfigure.web.servlet.ServletWebServerFactoryAutoConfiguration
+org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration
+org.springframework.boot.autoconfigure.webservices.WebServicesAutoConfiguration
+org.springframework.boot.autoconfigure.websocket.servlet.WebSocketServletAutoConfiguration
+org.springframework.boot.tomcat.autoconfigure.actuate.web.server.TomcatReactiveManagementContextAutoConfiguration
+org.springframework.boot.tomcat.autoconfigure.actuate.web.server.TomcatServletManagementContextAutoConfiguration
+org.springframework.boot.tomcat.autoconfigure.reactive.TomcatReactiveWebServerAutoConfiguration
+org.springframework.boot.tomcat.autoconfigure.servlet.TomcatServletWebServerAutoConfiguration

@@ -22,9 +22,40 @@ public class BeanDefinition {
     private String id;
     private String className;
 
+    private volatile Object beanClass;
+    private String factoryMethodName;
+    private boolean primary;
+
     public BeanDefinition(String id, String className) {
         this.id = id;
         this.className = className;
+    }
+
+    public BeanDefinition() {
+    }
+
+    public BeanDefinition(Class<?> beanClass) {
+        this.beanClass = beanClass;
+    }
+
+    public void setBeanClass(Object beanClass) {
+        this.beanClass = beanClass;
+    }
+
+    public boolean hasBeanClass() {
+        return (this.beanClass instanceof Class);
+    }
+
+    public Class<?> getBeanClass() throws IllegalStateException {
+        Object beanClassObject = this.beanClass;  // defensive access to volatile beanClass field
+        if (beanClassObject == null) {
+            throw new IllegalStateException("No bean class specified on bean definition");
+        }
+        if (!(beanClassObject instanceof Class<?> clazz)) {
+            throw new IllegalStateException(
+                    "Bean class name [" + beanClassObject + "] has not been resolved into an actual Class");
+        }
+        return clazz;
     }
 
     public String getId() {
@@ -70,4 +101,22 @@ public class BeanDefinition {
     public void setDependsOn(String[] refArray) {
         this.dependsOn = refArray;
     }
+
+    public String getBeanClassName() {
+        Object beanClassObject = this.beanClass;  // defensive access to volatile beanClass field
+        return (beanClassObject instanceof Class<?> clazz ? clazz.getName() : (String) beanClassObject);
+    }
+
+    public String getFactoryMethodName() {
+        return this.factoryMethodName;
+    }
+
+    public void setPrimary(boolean primary) {
+        this.primary = primary;
+    }
+
+    public boolean isPrimary() {
+        return this.primary;
+    }
+
 }
