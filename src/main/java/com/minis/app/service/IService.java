@@ -1,4 +1,4 @@
-package com.minis.test.scheduling;
+package com.minis.app.service;
 
 import com.minis.scheduling.ListenableFuture;
 

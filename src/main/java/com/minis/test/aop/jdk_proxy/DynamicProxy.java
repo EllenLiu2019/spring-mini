@@ -1,7 +1,7 @@
 package com.minis.test.aop.jdk_proxy;
 
-import com.minis.test.aop.service.IAction;
-import com.minis.test.aop.service.RealAction;
+import com.minis.app.service.IAction;
+import com.minis.app.service.RealAction;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.InvocationHandler;

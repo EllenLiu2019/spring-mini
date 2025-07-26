@@ -3,9 +3,10 @@ package com.minis.web.context.support;
 import com.minis.beans.factory.support.ConfigurableListableBeanFactory;
 import com.minis.beans.factory.support.DefaultListableBeanFactory;
 import com.minis.context.support.GenericApplicationContext;
+import com.minis.web.context.WebApplicationContext;
 import jakarta.servlet.ServletContext;
 
-public class GenericWebApplicationContext extends GenericApplicationContext {
+public class GenericWebApplicationContext extends GenericApplicationContext implements WebApplicationContext {
     private ServletContext servletContext;
     public GenericWebApplicationContext() {
     }

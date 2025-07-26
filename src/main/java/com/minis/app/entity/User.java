@@ -1,4 +1,4 @@
-package com.minis.test.entity;
+package com.minis.app.entity;
 
 
 import lombok.Data;

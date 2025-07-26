@@ -1,12 +1,14 @@
-package com.minis.test.scheduling;
+package com.minis.app.service;
 
 import com.minis.scheduling.ListenableFuture;
 import com.minis.scheduling.annotation.Async;
 import com.minis.scheduling.annotation.AsyncResult;
+import com.minis.stereotype.Component;
 import lombok.extern.slf4j.Slf4j;
 
 
 @Slf4j
+@Component
 public class IServiceImpl implements IService {
 
     @Override

@@ -4,6 +4,7 @@ import com.minis.beans.factory.BeanFactory;
 import com.minis.beans.BeansException;
 import com.minis.beans.factory.BeanFactoryAware;
 import com.minis.beans.factory.config.BeanPostProcessor;
+import com.minis.beans.factory.support.ListableBeanFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -27,6 +28,11 @@ public class AutowiredAnnotationBeanPostProcessor implements BeanPostProcessor, 
             if (field.isAnnotationPresent(Autowired.class)) {
                 String fieldName = field.getName();
                 Object autowiredObj = this.beanFactory.getBean(fieldName);
+                if (autowiredObj == null && this.beanFactory instanceof ListableBeanFactory listableBeanFactory) {
+                    Class<?> type = field.getType();
+                    String[] beanNames = listableBeanFactory.getBeanNamesForType(type);
+                    autowiredObj = this.beanFactory.getBean(beanNames[0]);
+                }
                 field.setAccessible(true);
                 field.set(bean, autowiredObj);
                 LOGGER.debug("autowire " + fieldName + " for bean: " + beanName);

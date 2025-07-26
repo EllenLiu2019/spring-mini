@@ -13,7 +13,7 @@ import java.util.Date;
 public class DefaultObjectMapper implements ObjectMapper {
     String dateFormat = "yyyy-MM-dd";
     DateTimeFormatter datetimeFormatter = DateTimeFormatter.ofPattern(dateFormat);
-    String decimalFormat = "#,##0.00";
+    String decimalFormat = "###.##";
     DecimalFormat decimalFormatter = new DecimalFormat(decimalFormat);
 
     @Override

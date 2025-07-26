@@ -5,6 +5,7 @@ import com.minis.beans.factory.support.ConfigurableListableBeanFactory;
 import com.minis.beans.factory.support.DefaultListableBeanFactory;
 import com.minis.boot.web.context.WebServerApplicationContext;
 import com.minis.boot.web.servlet.ServletContextInitializer;
+import com.minis.boot.web.servlet.ServletContextInitializerBeans;
 import com.minis.boot.web.servlet.server.ServletWebServerFactory;
 import com.minis.web.context.WebApplicationContext;
 import com.minis.web.context.support.GenericWebApplicationContext;
@@ -15,6 +16,8 @@ import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.Collection;
 
 @Slf4j
 public class ServletWebServerApplicationContext extends GenericWebApplicationContext
@@ -68,10 +71,6 @@ public class ServletWebServerApplicationContext extends GenericWebApplicationCon
         if (webServer == null && servletContext == null) {
             ServletWebServerFactory factory = getWebServerFactory();
             this.webServer = factory.getWebServer(getSelfInitializer());
-            /*getBeanFactory().registerSingleton("webServerGracefulShutdown",
-                    new WebServerGracefulShutdownLifecycle(this.webServer));
-            getBeanFactory().registerSingleton("webServerStartStop",
-                    new WebServerStartStopLifecycle(this, this.webServer));*/
         } else if (servletContext != null) {
             try {
                 getSelfInitializer().onStartup(servletContext);
@@ -87,13 +86,20 @@ public class ServletWebServerApplicationContext extends GenericWebApplicationCon
 
     private void selfInitialize(ServletContext servletContext) throws ServletException {
         prepareWebApplicationContext(servletContext);
-        //registerApplicationScope(servletContext);
-        //WebApplicationContextUtils.registerEnvironmentBeans(getBeanFactory(), servletContext);
-        /*for (ServletContextInitializer initializerBean : getServletContextInitializerBeans()) {
+
+        this.registerEnvironmentBeans(getBeanFactory(), servletContext);
+        for (ServletContextInitializer initializerBean : getServletContextInitializerBeans()) {
             initializerBean.onStartup(servletContext);
-        }*/
+        }
     }
 
+    private void registerEnvironmentBeans(ConfigurableListableBeanFactory beanFactory, ServletContext servletContext) {
+        beanFactory.registerSingleton("servletContext", servletContext);
+    }
+
+    protected Collection<ServletContextInitializer> getServletContextInitializerBeans() {
+        return new ServletContextInitializerBeans(getBeanFactory());
+    }
 
     /**
      * Prepare the {@link WebApplicationContext} with the given fully loaded

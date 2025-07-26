@@ -1,11 +1,11 @@
 package com.minis.test.controller;
 
 import com.minis.beans.factory.annotation.Autowired;
-import com.minis.test.aop.service.IAction;
+import com.minis.app.service.IAction;
 import com.minis.test.ioc.BaseService;
-import com.minis.test.entity.User;
-import com.minis.test.jdbc.UserService;
-import com.minis.test.scheduling.IService;
+import com.minis.app.entity.User;
+import com.minis.app.service.UserService;
+import com.minis.app.service.IService;
 import com.minis.web.bind.annotation.RequestMapping;
 import com.minis.web.bind.annotation.ResponseBody;
 import jakarta.servlet.http.HttpServletRequest;

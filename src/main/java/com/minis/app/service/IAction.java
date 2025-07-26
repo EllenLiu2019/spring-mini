@@ -1,4 +1,4 @@
-package com.minis.test.aop.service;
+package com.minis.app.service;
 
 public interface IAction {
     void doAction();

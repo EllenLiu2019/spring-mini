@@ -5,6 +5,7 @@ import com.minis.beans.BeansException;
 import com.minis.beans.factory.BeanFactory;
 import com.minis.beans.factory.BeanFactoryAware;
 import com.minis.beans.factory.FactoryBean;
+import com.minis.beans.factory.support.ListableBeanFactory;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -55,6 +56,10 @@ public class ProxyFactoryBean implements FactoryBean<Object>, BeanFactoryAware {
         //MethodInterceptor interceptor = null;
         try {
             advice = this.beanFactory.getBean(this.interceptorName);
+            if (advice == null && this.beanFactory instanceof ListableBeanFactory listableBeanFactory) {
+                String[] beanNames = listableBeanFactory.getBeanNamesForType(Advisor.class);
+                advice = this.beanFactory.getBean(beanNames[0]);
+            }
             this.advisor = (Advisor) advice;
         } catch (BeansException | ReflectiveOperationException e) {
             throw new RuntimeException(e);

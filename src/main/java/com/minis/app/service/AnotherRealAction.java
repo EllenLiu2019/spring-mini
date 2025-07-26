@@ -1,9 +1,11 @@
-package com.minis.test.aop.service;
+package com.minis.app.service;
 
+import com.minis.stereotype.Component;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class AnotherRealAction implements IAction{
+@Component
+public class AnotherRealAction implements IAction {
     @Override
     public void doAction() {
         log.info("really do another action");

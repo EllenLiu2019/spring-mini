@@ -1,7 +1,7 @@
 package com.minis.test.jdbc;
 
 import com.minis.jdbc.core.OldJdbcTemplate;
-import com.minis.test.entity.User;
+import com.minis.app.entity.User;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

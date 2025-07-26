@@ -8,6 +8,7 @@ import com.minis.beans.factory.support.ConfigurableListableBeanFactory;
 import com.minis.beans.factory.support.DefaultListableBeanFactory;
 import com.minis.context.event.ApplicationEvent;
 import com.minis.context.event.ApplicationListener;
+import com.minis.context.event.ContextRefreshedEvent;
 import com.minis.scheduling.annotation.AsyncAnnotationBeanPostProcessor;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -47,7 +48,17 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 
     @Override
     public void registerListeners() {
-
+        for (String bdName : this.beanFactory.getBeanDefinitionNames()) {
+            Object bean;
+            try {
+                bean = this.beanFactory.getBean(bdName);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            if (bean instanceof ApplicationListener<?> listener) {
+                this.getApplicationEventPublisher().addApplicationListener(listener);
+            }
+        }
     }
 
     //---------------------------------------------------------------------
@@ -67,7 +78,7 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
     }
     @Override
     public void finishRefresh() {
-
+        this.publishEvent(new ContextRefreshedEvent(this));
     }
 
     @Override

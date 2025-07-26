@@ -9,6 +9,10 @@ import java.lang.reflect.Method;
 public class NameMatchMethodPointcut implements MethodMatcher, Pointcut {
     private String mappedName = "";
 
+    public NameMatchMethodPointcut(String mappedName) {
+        this.mappedName = mappedName;
+    }
+
     public void setMappedName(String mappedName) {
         this.mappedName = mappedName;
     }

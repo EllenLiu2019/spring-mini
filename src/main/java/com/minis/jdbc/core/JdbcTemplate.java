@@ -1,7 +1,7 @@
 package com.minis.jdbc.core;
 
 import com.minis.beans.factory.annotation.Autowired;
-import com.minis.test.entity.User;
+import com.minis.app.entity.User;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.sql.DataSource;

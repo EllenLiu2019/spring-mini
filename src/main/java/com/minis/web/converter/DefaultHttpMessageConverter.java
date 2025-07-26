@@ -1,8 +1,9 @@
 package com.minis.web.converter;
 
+import com.minis.beans.factory.annotation.Autowired;
+import com.minis.utils.DefaultObjectMapper;
 import com.minis.utils.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.Setter;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -10,7 +11,8 @@ import java.io.PrintWriter;
 public class DefaultHttpMessageConverter implements HttpMessageConverter {
     String defaultContentType = "text/json;charset=UTF-8";
     String defaultCharacterEncoding = "UTF-8";
-    @Setter // TODO: Property Setter for deserialization
+
+    @Autowired
     ObjectMapper objectMapper;
 
     @Override
@@ -26,4 +28,5 @@ public class DefaultHttpMessageConverter implements HttpMessageConverter {
         PrintWriter printWriter = response.getWriter();
         printWriter.write(sJsonStr);
     }
+
 }

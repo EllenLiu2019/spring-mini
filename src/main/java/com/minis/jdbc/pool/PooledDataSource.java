@@ -22,11 +22,11 @@ public class PooledDataSource implements DataSource {
     private String driverClassName;
     @Setter
     @Getter
-    private String url;
+    private String url = "jdbc:mysql://localhost:3306/spring-mini";
     @Setter
-    private String username;
+    private String username = "deepblue";
     @Setter
-    private String password;
+    private String password = "deepblue123456";
     @Getter
     private Properties connectionProperties;
     private List<PooledConnection> connections;

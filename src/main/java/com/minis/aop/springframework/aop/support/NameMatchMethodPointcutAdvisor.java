@@ -5,15 +5,18 @@ import com.minis.aop.springframework.aop.*;
 import com.minis.aop.aopalliance.intercept.MethodInterceptor;
 import com.minis.aop.springframework.aop.framework.adapter.AfterReturningAdviceInterceptor;
 import com.minis.aop.springframework.aop.framework.adapter.MethodBeforeAdviceInterceptor;
+import com.minis.beans.factory.annotation.Autowired;
 
 // TODO: 代替了 DefaultAdvisor， 新增了 pointcut 功能；即，批量匹配增强方法
 public class NameMatchMethodPointcutAdvisor implements PointcutAdvisor {
 
+    @Autowired
     private Advice advice;
-    private String mappedName;
+    private String mappedName = "do*";
 
-    private final NameMatchMethodPointcut pointcut = new NameMatchMethodPointcut();
+    private final NameMatchMethodPointcut pointcut = new NameMatchMethodPointcut(mappedName);
 
+    @Autowired
     private MethodInterceptor methodInterceptor;
 
     public void setAdvice(Advice advice) {

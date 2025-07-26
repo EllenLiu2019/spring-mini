@@ -1,9 +1,10 @@
-package com.minis.test.jdbc;
+package com.minis.app.service;
 
 import com.minis.beans.factory.annotation.Autowired;
 import com.minis.jdbc.core.JdbcTemplate;
 import com.minis.jdbc.core.RowMapper;
-import com.minis.test.entity.User;
+import com.minis.stereotype.Component;
+import com.minis.app.entity.User;
 import lombok.extern.slf4j.Slf4j;
 
 import java.sql.ResultSet;
@@ -13,6 +14,7 @@ import java.util.Date;
 import java.util.List;
 
 @Slf4j
+@Component
 public class UserService {
     @Autowired
     private JdbcTemplate jdbcTemplate;

@@ -2,6 +2,7 @@ package com.minis.tx.interceptor;
 
 import com.minis.aop.aopalliance.intercept.MethodInterceptor;
 import com.minis.aop.aopalliance.intercept.MethodInvocation;
+import com.minis.beans.factory.annotation.Autowired;
 import com.minis.tx.transaction.TransactionManager;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -10,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class TransactionInterceptor implements MethodInterceptor {
 
-    @Setter
+    @Autowired
     private TransactionManager txManager;
 
     @Override

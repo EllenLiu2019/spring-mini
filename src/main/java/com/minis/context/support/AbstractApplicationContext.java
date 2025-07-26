@@ -38,11 +38,7 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
     // TODO: it's sub-class override this method, so this method only serves servlet context,
     //  means all servlet controller beans extended ApplicationContextAware can obtain controller context
     public Object getBean(String beanName) throws BeansException, ReflectiveOperationException {
-        Object returnObj = getBeanFactory().getBean(beanName);
-        if (returnObj instanceof ApplicationContextAware) {
-            ((ApplicationContextAware) returnObj).setApplicationContext(this);
-        }
-        return returnObj;
+        return getBeanFactory().getBean(beanName);
     }
 
     public List<BeanFactoryPostProcessor> getBeanFactoryPostProcessors() {
@@ -56,6 +52,9 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 
     public void refresh() {
         ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
+
+        prepareBeanFactory(beanFactory);
+
         try {
             postProcessBeanFactory(beanFactory);
 
@@ -103,6 +102,9 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
         return getBeanFactory();
     }
 
+    protected void prepareBeanFactory(ConfigurableListableBeanFactory beanFactory) {
+        beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
+    }
     //---------------------------------------------------------------------
     // Abstract methods that must be implemented by subclasses
     //---------------------------------------------------------------------
