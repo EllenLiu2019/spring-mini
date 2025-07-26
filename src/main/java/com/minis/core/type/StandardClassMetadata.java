@@ -35,9 +35,7 @@ public class StandardClassMetadata implements ClassMetadata {
 
     @Override
     public boolean isIndependent() {
-        return (!hasEnclosingClass() ||
-                (this.introspectedClass.getDeclaredClasses() != null &&
-                        Modifier.isStatic(this.introspectedClass.getModifiers())));
+        return !hasEnclosingClass() || Modifier.isStatic(this.introspectedClass.getModifiers());
     }
 
     @Override

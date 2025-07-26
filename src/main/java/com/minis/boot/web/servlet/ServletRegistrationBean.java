@@ -27,10 +27,9 @@ public class ServletRegistrationBean<T extends Servlet> extends DynamicRegistrat
     private Set<String> urlMappings = new LinkedHashSet<>();
 
     public ServletRegistrationBean() {
-        this.servlet = (T) new DispatcherServlet();
     }
 
-    public void setDispatcherServlet(DispatcherServlet servlet) {
+    public void setServlet(DispatcherServlet servlet) {
         this.servlet = (T) servlet;
     }
 

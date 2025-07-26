@@ -6,8 +6,6 @@ import com.minis.beans.factory.support.BeanDefinitionRegistry;
 import com.minis.beans.factory.support.BeanNameGenerator;
 import com.minis.core.io.FileSystemResource;
 import com.minis.core.io.Resource;
-import com.minis.core.type.AnnotationMetadata;
-import com.minis.stereotype.Component;
 import com.minis.utils.ClassUtils;
 import com.minis.utils.ResourceUtils;
 import com.minis.utils.StringUtils;
@@ -105,7 +103,7 @@ public class ClassPathBeanDefinitionScanner {
                 Class<?> clazz = Class.forName(className);
                 if (isInstantiable(clazz) && !this.excludeFilters.contains(className)) {
                     ScannedGenericBeanDefinition beanDefinition = new ScannedGenericBeanDefinition(clazz);
-                    if (this.isCandidateComponent(beanDefinition)) {
+                    if (ConfigurationClassUtils.isConfigurationCandidate(beanDefinition.getMetadata())) {
                         candidates.add(beanDefinition);
                     }
                 }
@@ -114,11 +112,6 @@ public class ClassPathBeanDefinitionScanner {
             }
         }
         return candidates;
-    }
-
-    private boolean isCandidateComponent(ScannedGenericBeanDefinition beanDefinition) {
-        AnnotationMetadata metadata = beanDefinition.getMetadata();
-        return metadata.isAnnotated(Component.class.getName());
     }
 
     public boolean isInstantiable(Class<?> clazz) {

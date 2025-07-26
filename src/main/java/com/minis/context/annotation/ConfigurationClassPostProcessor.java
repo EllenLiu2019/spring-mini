@@ -48,7 +48,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
     }
 
     private void enhanceConfigurationClasses(ConfigurableListableBeanFactory beanFactory) {
-        // TODO: setup configuration class
+        // TODO: any candidates are then enhanced by a ConfigurationClassEnhancer.
     }
 
     @Override
@@ -73,6 +73,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
             return;
         }
 
+        // Parse each @Configuration class
         ConfigurationClassParser parser = new ConfigurationClassParser(registry);
 
         Set<BeanDefinitionHolder> candidates = new LinkedHashSet<>(configCandidates);

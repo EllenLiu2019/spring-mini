@@ -30,6 +30,7 @@ class ConfigurationClassParser {
 
     private final Map<ConfigurationClass, ConfigurationClass> configurationClasses = new LinkedHashMap<>();
 
+    private final Map<String, ConfigurationClass> knownSuperclasses = new LinkedHashMap<>();
     private final DeferredImportSelectorHandler deferredImportSelectorHandler = new DeferredImportSelectorHandler();
     private SourceClass objectSourceClass = new SourceClass(Object.class);
     //private ImportStack importStack = new ImportStack();
@@ -71,7 +72,6 @@ class ConfigurationClassParser {
     }
 
     private void processConfigurationClass(ConfigurationClass configClass, Predicate<String> filter) {
-
         // Recursively process the configuration class and its superclass hierarchy.
         SourceClass sourceClass = null;
         try {
@@ -132,7 +132,7 @@ class ConfigurationClassParser {
                 // TODO: The config class is annotated with @ComponentScan -> perform the scan immediately,
                 //  All configuration class will be found and constructed as beanDefinition and registered into registry
                 Set<BeanDefinition> scannedBeanDefinitions =
-                        this.componentScanParser.parse(componentScan, configClass.getMetadata().getClassName());
+                        this.componentScanParser.parse(componentScan, sourceClass.getMetadata().getClassName());
                 // TODO: Check the set of scanned beanDefinitions for any further config classes,
                 //  because these config classes should be parsed recursively
                 for (BeanDefinition bdCand : scannedBeanDefinitions) {
@@ -161,6 +161,20 @@ class ConfigurationClassParser {
 
         //processInterfaces(configClass, sourceClass);
 
+        // Process superclass, if any
+        if (sourceClass.getMetadata().hasSuperClass()) {
+            String superclass = sourceClass.getMetadata().getSuperClassName();
+            if (superclass != null && !superclass.startsWith("java")) {
+                boolean superclassKnown = this.knownSuperclasses.containsKey(superclass);
+                this.knownSuperclasses.put(superclass, configClass);
+                if (!superclassKnown) {
+                    // Superclass found, return its annotation metadata and recurse
+                    return sourceClass.getSuperClass();
+                }
+            }
+        }
+
+        // No superclass -> processing is complete
         return null;
     }
 
@@ -424,6 +438,14 @@ class ConfigurationClassParser {
 
         public final AnnotationMetadata getMetadata() {
             return this.metadata;
+        }
+
+        public SourceClass getSuperClass() {
+            if (this.source instanceof Class<?> sourceClass) {
+                return asSourceClass(sourceClass.getSuperclass(), DEFAULT_EXCLUSION_FILTER);
+            }
+            log.error("source is not a Class, ignore...");
+            throw new RuntimeException("source is not a Class");
         }
 
         public Set<SourceClass> getAnnotations() {

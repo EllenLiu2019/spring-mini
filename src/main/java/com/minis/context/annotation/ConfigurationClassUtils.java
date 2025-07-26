@@ -1,21 +1,15 @@
 package com.minis.context.annotation;
 
 import com.minis.beans.factory.annotation.AnnotatedBeanDefinition;
-import com.minis.beans.factory.annotation.AnnotatedGenericBeanDefinition;
 import com.minis.beans.factory.config.BeanDefinition;
 import com.minis.beans.factory.config.BeanFactoryPostProcessor;
 import com.minis.beans.factory.config.BeanPostProcessor;
 import com.minis.beans.factory.support.RootBeanDefinition;
 import com.minis.core.annotation.AnnotationAttributes;
-import com.minis.core.annotation.MergedAnnotations;
-import com.minis.core.annotation.TypeMappedAnnotations;
 import com.minis.core.type.AnnotationMetadata;
-import com.minis.core.type.StandardAnnotationMetadata;
-import com.minis.core.type.classreading.MetadataReaderFactory;
 import com.minis.stereotype.Component;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Map;
 import java.util.Set;
 
 @Slf4j
@@ -36,7 +30,7 @@ public abstract class ConfigurationClassUtils {
             return false;
         }
 
-        AnnotationMetadata metadata = null;
+        AnnotationMetadata metadata;
 
         if (beanDef instanceof AnnotatedBeanDefinition annotatedBd && className.equals(annotatedBd.getMetadata().getClassName())) {
             metadata = annotatedBd.getMetadata();
@@ -46,26 +40,25 @@ public abstract class ConfigurationClassUtils {
                     BeanPostProcessor.class.isAssignableFrom(beanClass)) {
                 return false;
             }
+            metadata = AnnotationMetadata.introspect(beanClass);
         } else {
             try {
                 Class<?> beanClass = Class.forName(className);
-                metadata = StandardAnnotationMetadata.from(beanClass);
+                metadata = AnnotationMetadata.introspect(beanClass);
             } catch (ClassNotFoundException e) {
                 return false;
             }
         }
 
         AnnotationAttributes config = metadata.getAnnotationAttributes(Configuration.class.getName());
-        if (config != null && !Boolean.FALSE.equals(config.get("proxyBeanMethods"))) {
-            return true;
-        } /*else if (config != null || isConfigurationCandidate(metadata)) {
-            beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_LITE);
-        }*/ else {
-            return false;
+        if (config != null) {
+            return !Boolean.FALSE.equals(config.get("proxyBeanMethods")) || isConfigurationCandidate(metadata);
         }
+
+        return false;
     }
 
-    /*static boolean isConfigurationCandidate(AnnotationMetadata metadata) {
+    static boolean isConfigurationCandidate(AnnotationMetadata metadata) {
         // Do not consider an interface or an annotation...
         if (metadata.isInterface()) {
             return false;
@@ -77,12 +70,12 @@ public abstract class ConfigurationClassUtils {
                 return true;
             }
         }
-
+        return false;
         // Finally, let's look for @Bean methods...
-        return hasBeanMethods(metadata);
+        //return hasBeanMethods(metadata);
     }
 
-    private static boolean hasBeanMethods(AnnotationMetadata metadata) {
+    /*private static boolean hasBeanMethods(AnnotationMetadata metadata) {
        return metadata.hasAnnotatedMethods(Bean.class.getName());
     }*/
 }

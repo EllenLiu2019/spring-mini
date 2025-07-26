@@ -3,13 +3,11 @@ package com.minis.core.type;
 import com.minis.core.annotation.*;
 
 import java.lang.annotation.Annotation;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public interface AnnotationMetadata {
+public interface AnnotationMetadata extends ClassMetadata {
 
     // TODO: 反射，创建注解元数据
     static AnnotationMetadata introspect(Class<?> type) {
@@ -51,4 +49,6 @@ public interface AnnotationMetadata {
                 .map(annotation -> annotation.getType().getName())
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
+
+    boolean isInterface();
 }

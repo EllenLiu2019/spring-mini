@@ -20,9 +20,11 @@ public class TomcatServletWebServerFactory implements ServletWebServerFactory {
     private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
     private static final Set<Class<?>> NO_CLASSES = Collections.emptySet();
 
+    public static final String DEFAULT_PROTOCOL = "org.apache.coyote.http11.Http11NioProtocol";
+
     private int port = 8080;
 
-    private static String protocol = "org.apache.coyote.http11.Http11NioProtocol";
+    private String protocol = DEFAULT_PROTOCOL;
 
     private Charset uriEncoding = DEFAULT_CHARSET;
 
@@ -63,8 +65,7 @@ public class TomcatServletWebServerFactory implements ServletWebServerFactory {
     private void ignoringNoSuchMethodError(Runnable method) {
         try {
             method.run();
-        }
-        catch (NoSuchMethodError ex) {
+        } catch (NoSuchMethodError ignored) {
         }
     }
 
