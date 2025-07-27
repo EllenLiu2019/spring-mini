@@ -8,6 +8,7 @@ import com.minis.utils.ClassUtils;
 import com.minis.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -18,7 +19,7 @@ import java.util.Map;
 // TODO: 实现 postProcessor, 继承自 AbstractBeanFactory
 //  成员变量 List<BeanPostProcessor> beanPostProcessors 用于存储 BeanPostProcessor
 @Slf4j
-public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory implements AutowireCapableBeanFactory {
+public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory implements AutowireCapableBeanFactory, ListableBeanFactory {
     private final List<BeanPostProcessor> beanPostProcessors = new ArrayList<>();
     private final Map<String, Object> earlySingletonObjects = new HashMap<>(16);
     private boolean allowCircularReferences;
@@ -78,6 +79,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
             }
         }
     }
+
     @Override
     public int getBeanPostProcessorCount() {
         return this.beanPostProcessors.size();
@@ -115,5 +117,36 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
     public void setAllowCircularReferences(boolean allowCircularReferences) {
         this.allowCircularReferences = allowCircularReferences;
+    }
+
+    @Override
+    public Object createBeanInstance(String beanName, Class<?> clazz, BeanDefinition bd) throws ReflectiveOperationException {
+        try {
+            return clazz.getConstructor().newInstance();
+        } catch (NoSuchMethodException e) {
+            log.info("no default constructor, autowired try");
+            return autowireConstructor(clazz);
+        }
+    }
+
+    private Object autowireConstructor(Class<?> clazz) throws ReflectiveOperationException {
+        Object instance;
+        Constructor<?>[] ctors = clazz.getDeclaredConstructors();
+        for (Constructor<?> ctor : ctors) {
+            Class<?>[] parameterTypes = ctor.getParameterTypes();
+            Object[] args = new Object[parameterTypes.length];
+            try {
+                for (int i = 0; i < parameterTypes.length; i++) {
+                    String[] beanNames = getBeanNamesForType(parameterTypes[i]);
+                    Object arg = getBean(beanNames[0]);
+                    args[i] = arg;
+                }
+                instance = ctor.newInstance(args);
+            } catch (ReflectiveOperationException | BeansException e) {
+                throw new RuntimeException(e);
+            }
+            return instance;
+        }
+        throw new ReflectiveOperationException("No matching constructor found for bean '" + clazz + "'");
     }
 }

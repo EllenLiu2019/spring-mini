@@ -104,7 +104,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
             con.setAccessible(true);
             obj = con.newInstance(paramValues);
         } else {
-            obj = clz.getConstructor().newInstance();
+            obj = createBeanInstance(beanClassName, clz, bd);
         }
 
         LOGGER.debug("bean created: id = {}, className = {}, obj = {}", bd.getId(), beanClassName, obj);
@@ -118,10 +118,10 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
     }
 
     private void handleProperties(BeanDefinition beanDefinition, Class<?> clz, Object obj) {
-        LOGGER.debug("populating Bean : id = {}, className = {}", beanDefinition.getId(), beanDefinition.getClassName());
-
         PropertyValues propertyValues = beanDefinition.getPropertyValues();
         if (propertyValues != null && !propertyValues.isEmpty()) {
+            LOGGER.debug("populating Bean : id = {}, className = {}", beanDefinition.getId(), beanDefinition.getClassName());
+
             for (int i = 0; i < propertyValues.size(); i++) {
                 PropertyValue pv = propertyValues.getPropertyValueList().get(i);
 
@@ -158,9 +158,10 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
                 } catch (ReflectiveOperationException | BeansException e) {
                     throw new RuntimeException(e);
                 }
+
+                LOGGER.debug("Bean populated : id = {}, className = {}", beanDefinition.getId(), beanDefinition.getClassName());
             }
         }
-        LOGGER.debug("Bean populated : id = {}, className = {}", beanDefinition.getId(), beanDefinition.getClassName());
     }
 
     // TODO: why need this method? BeanFactory holds BeanDefinition,
@@ -212,5 +213,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
     }
 
     protected abstract Object doGetBean(String beanName) throws ReflectiveOperationException, BeansException;
+
+    abstract Object createBeanInstance(String beanName, Class<?> clz, BeanDefinition bd) throws ReflectiveOperationException;
 
 }

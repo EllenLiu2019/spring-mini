@@ -1,7 +1,6 @@
 com.minis.web.servlet.RequestMappingHandlerAdapter
 com.minis.web.servlet.RequestMappingHandlerMapping
 com.minis.boot.web.embedded.TomcatServletWebServerFactory
-org.apache.tomcat.websocket.server.WsSci
 com.minis.web.servlet.DispatcherServlet
 com.minis.boot.web.servlet.DispatcherServletRegistrationBean
 com.minis.web.converter.DefaultHttpMessageConverter
