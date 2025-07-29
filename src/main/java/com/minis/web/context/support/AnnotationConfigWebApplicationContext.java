@@ -174,13 +174,6 @@ public class AnnotationConfigWebApplicationContext extends AbstractApplicationCo
     }
 
     @Override
-    public void registerBeanPostProcessors() {
-        this.beanFactory.addBeanPostProcessor(new AutowiredAnnotationBeanPostProcessor());
-        this.beanFactory.addBeanPostProcessor(new BeanNameAutoProxyCreator());
-        this.beanFactory.addBeanPostProcessor(new AsyncAnnotationBeanPostProcessor());
-    }
-
-    @Override
     public void onRefresh() {
         this.beanFactory.refresh();
     }

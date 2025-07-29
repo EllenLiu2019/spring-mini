@@ -2,6 +2,7 @@ package com.minis.context.support;
 
 import com.minis.beans.BeansException;
 import com.minis.beans.factory.config.BeanFactoryPostProcessor;
+import com.minis.beans.factory.config.BeanPostProcessor;
 import com.minis.beans.factory.support.BeanDefinitionRegistry;
 import com.minis.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import com.minis.beans.factory.support.ConfigurableListableBeanFactory;
@@ -43,6 +44,13 @@ final public class PostProcessorRegistrationDelegate {
                                                         ConfigurableListableBeanFactory beanFactory) {
         for (BeanFactoryPostProcessor postProcessor : postProcessors) {
             postProcessor.postProcessBeanFactory(beanFactory);
+        }
+    }
+
+    public static void registerBeanPostProcessors(ConfigurableListableBeanFactory beanFactory) throws ReflectiveOperationException, BeansException {
+        String[] postProcessorNames = beanFactory.getBeanNamesForType(BeanPostProcessor.class);
+        for(String postProcessorName : postProcessorNames) {
+            beanFactory.addBeanPostProcessor((BeanPostProcessor) beanFactory.getBean(postProcessorName));
         }
     }
 }

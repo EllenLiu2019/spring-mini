@@ -1,7 +1,7 @@
 com.minis.web.servlet.RequestMappingHandlerAdapter
 com.minis.web.servlet.RequestMappingHandlerMapping
-com.minis.boot.web.embedded.TomcatServletWebServerFactory
 com.minis.web.servlet.DispatcherServlet
+com.minis.boot.web.embedded.TomcatServletWebServerFactory
 com.minis.boot.web.servlet.DispatcherServletRegistrationBean
 com.minis.web.converter.DefaultHttpMessageConverter
 com.minis.utils.DefaultObjectMapper
@@ -10,4 +10,5 @@ com.minis.jdbc.pool.PooledDataSource
 com.minis.jdbc.core.JdbcTemplate
 com.minis.tx.transaction.TransactionManager
 com.minis.tx.interceptor.TransactionInterceptor
+com.minis.aop.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator
 com.minis.aop.springframework.aop.support.NameMatchMethodPointcutAdvisor

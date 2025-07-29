@@ -34,7 +34,6 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 
     }
 
-    @Override
     public void registerBeanPostProcessors() {
         this.beanFactory.addBeanPostProcessor(new AutowiredAnnotationBeanPostProcessor());
         this.beanFactory.addBeanPostProcessor(new BeanNameAutoProxyCreator());

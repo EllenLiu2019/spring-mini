@@ -1,15 +1,14 @@
 package com.minis.context.support;
 
 import com.minis.beans.BeansException;
-import com.minis.beans.factory.BeanFactory;
+import com.minis.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import com.minis.beans.factory.config.BeanFactoryPostProcessor;
 import com.minis.beans.factory.config.BeanPostProcessor;
 import com.minis.beans.factory.support.ConfigurableListableBeanFactory;
-import com.minis.context.ApplicationContext;
-import com.minis.context.ApplicationContextAware;
 import com.minis.context.ApplicationEventPublisher;
 import com.minis.context.ConfigurableApplicationContext;
 import com.minis.core.env.Environment;
+import com.minis.scheduling.annotation.AsyncAnnotationBeanPostProcessor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,30 +57,28 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
         try {
             postProcessBeanFactory(beanFactory);
 
-            // TODO:
-            //  getBean 并 invoke beanFactory processors：
+            //  getBean 并 invoke Factory processors：
             //  eg: 1. ConfigurationClassPostProcessor: 通过注册的 configuration classes 获得更多的 bean definitions，
             //           包含：实例化 @import 的类 AutoConfigurationImportSelector.class，
             //           加载 @AutoConfiguration 拼接的文件：META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports
             //      2. AopAutoConfiguration#ClassProxyingConfiguration: 注册 proxy creator 的 beanDefinition
-            //  带有 @Configuration 的配置类，会被替换为 cglib 的 proxy
-            //  带有 @Async 的类，会被替换为 jdk 的 proxy ？
+            //      3. 加载 beanDefinitions for *.imports  中配置的类，其中包含 beanPostProcessors，例如：SpringDataWebAutoConfiguration
+            //         eg: JpaRepositoriesRegistrar -> 获取包扫描获得的接口，并注册 beanDefinition
             invokeBeanFactoryPostProcessors(beanFactory);
 
-            // TODO: Register bean processors that intercept bean creation.
-            //  注册 bean processors: 实例化 beanDefinition 注册中心中注册的 postProcessor beans
-            //  并放入 beanFactory 的成员变量 List<BeanPostProcessor> beanPostProcessors
-            //  eg. CommonAnnotationBeanPostProcessor
-            //      AutowiredAnnotationBeanPostProcessor
-            registerBeanPostProcessors();
+            // Register bean processors that intercept bean creation.
+            // 实例化BeanPostProcessor，FactoryBean 在此阶段创建；例如：JpaRepositoryFactoryBean
+            registerBeanPostProcessors(beanFactory);
 
             initApplicationEventPublisher();
 
-            // TODO: start tomcat server
+            // start tomcat server
             onRefresh();
 
-            // TODO: Instantiate all remaining (non-lazy-init) singletons.
-            //  过程中会调用 bean processors 处理 实例化后的 bean
+            // Instantiate all remaining (non-lazy-init) singletons.
+            //  Initialize -> FactoryBean create proxy
+            //  TODO: jpa: JpaRepositoryFactoryBean#afterPropertiesSet() 创建 jpaRepositoryFactory,
+            //   jpaRepositoryFactory 创建 target(SimpleJpaRepository) & jdkProxy，设置 interceptors(advice)
             finishBeanFactoryInitialization(beanFactory);
 
             registerListeners();
@@ -104,6 +101,7 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 
     protected void prepareBeanFactory(ConfigurableListableBeanFactory beanFactory) {
         beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
+        beanFactory.addBeanPostProcessor(new AsyncAnnotationBeanPostProcessor());
     }
     //---------------------------------------------------------------------
     // Abstract methods that must be implemented by subclasses
@@ -126,7 +124,14 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
 
     public abstract void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory);
 
-    public abstract void registerBeanPostProcessors();
+    /**
+     * Instantiate and register all BeanPostProcessor beans,
+     * respecting explicit order if given.
+     * <p>Must be called before any instantiation of application beans.
+     */
+    protected void registerBeanPostProcessors(ConfigurableListableBeanFactory beanFactory) throws ReflectiveOperationException, BeansException {
+        PostProcessorRegistrationDelegate.registerBeanPostProcessors(beanFactory);
+    }
 
     public abstract void initApplicationEventPublisher();
 
