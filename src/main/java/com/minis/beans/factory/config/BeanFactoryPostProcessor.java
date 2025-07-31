@@ -1,8 +1,8 @@
 package com.minis.beans.factory.config;
 
-import com.minis.beans.factory.BeanFactory;
+import com.minis.beans.factory.support.ConfigurableListableBeanFactory;
 
 @FunctionalInterface
 public interface BeanFactoryPostProcessor {
-    void postProcessBeanFactory(BeanFactory beanFactory);
+    void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory);
 }

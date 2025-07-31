@@ -14,7 +14,8 @@ public class NameMatchMethodPointcutAdvisor implements PointcutAdvisor {
     private Advice advice;
     private String mappedName = "do*";
 
-    private final NameMatchMethodPointcut pointcut = new NameMatchMethodPointcut(mappedName);
+    @Autowired
+    private Pointcut pointcut;
 
     @Autowired
     private MethodInterceptor methodInterceptor;
@@ -34,7 +35,6 @@ public class NameMatchMethodPointcutAdvisor implements PointcutAdvisor {
     }
     public void setMappedName(String mappedName) {
         this.mappedName = mappedName;
-        this.pointcut.setMappedName(mappedName);
     }
 
     @Override

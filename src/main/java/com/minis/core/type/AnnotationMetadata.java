@@ -51,4 +51,10 @@ public interface AnnotationMetadata extends ClassMetadata {
     }
 
     boolean isInterface();
+
+    Set<MethodMetadata> getAnnotatedMethods(String annotationName);
+
+    default boolean hasAnnotatedMethods(String annotationName) {
+        return !getAnnotatedMethods(annotationName).isEmpty();
+    }
 }

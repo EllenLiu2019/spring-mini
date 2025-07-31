@@ -3,10 +3,12 @@ package com.minis.core.type;
 import com.minis.core.annotation.AnnotationAttributes;
 import com.minis.core.annotation.MergedAnnotations;
 import com.minis.core.annotation.TypeMappedAnnotations;
+import com.minis.utils.ReflectionUtils;
 
-import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Method;
 import java.util.Collections;
-import java.util.Map;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class StandardAnnotationMetadata extends StandardClassMetadata implements AnnotationMetadata {
@@ -45,6 +47,25 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
             this.annotationTypes = annotationTypes;
         }
         return annotationTypes;
+    }
+
+    @Override
+    public Set<MethodMetadata> getAnnotatedMethods(String annotationName) {
+        Set<MethodMetadata> result = new LinkedHashSet<>(4);
+        ReflectionUtils.doWithLocalMethods(getIntrospectedClass(), method -> {
+            if (isAnnotatedMethod(method, annotationName)) {
+                result.add(new StandardMethodMetadata(method));
+            }
+        });
+        return Collections.unmodifiableSet(result);
+    }
+
+    private boolean isAnnotatedMethod(Method method, String annotationName) {
+        return method.getAnnotations().length > 0 && isAnnotated(method, annotationName);
+    }
+
+    private static boolean isAnnotated(AnnotatedElement element, String annotationName) {
+        return new TypeMappedAnnotations(element).isPresent(annotationName);
     }
 
 }

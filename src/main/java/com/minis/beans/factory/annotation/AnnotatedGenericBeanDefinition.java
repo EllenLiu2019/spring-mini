@@ -2,15 +2,15 @@ package com.minis.beans.factory.annotation;
 
 import com.minis.beans.factory.config.BeanDefinition;
 import com.minis.core.type.AnnotationMetadata;
+import com.minis.core.type.MethodMetadata;
 import com.minis.core.type.StandardAnnotationMetadata;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 public class AnnotatedGenericBeanDefinition extends BeanDefinition implements AnnotatedBeanDefinition {
 
     private final AnnotationMetadata metadata;
-    private final Map<String, Object> attributes = new LinkedHashMap<>();
+
+    private MethodMetadata factoryMethodMetadata;
 
     public AnnotatedGenericBeanDefinition(Class<?> beanClass) {
         setBeanClass(beanClass);
@@ -28,17 +28,9 @@ public class AnnotatedGenericBeanDefinition extends BeanDefinition implements An
         return this.metadata;
     }
 
-    public void setAttribute(String name, Object value) {
-        if (value != null) {
-            this.attributes.put(name, value);
-        }
-        else {
-            removeAttribute(name);
-        }
-    }
-
-    public Object removeAttribute(String name) {
-        return this.attributes.remove(name);
+    @Override
+    public MethodMetadata getFactoryMethodMetadata() {
+        return this.factoryMethodMetadata;
     }
 
 }

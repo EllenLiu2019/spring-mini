@@ -3,6 +3,7 @@ package com.minis.context.annotation;
 import com.minis.beans.factory.annotation.AnnotatedBeanDefinition;
 import com.minis.beans.factory.config.BeanDefinition;
 import com.minis.core.type.AnnotationMetadata;
+import com.minis.core.type.MethodMetadata;
 
 public class ScannedGenericBeanDefinition extends BeanDefinition implements AnnotatedBeanDefinition {
 
@@ -21,6 +22,11 @@ public class ScannedGenericBeanDefinition extends BeanDefinition implements Anno
     @Override
     public AnnotationMetadata getMetadata() {
         return this.metadata;
+    }
+
+    @Override
+    public MethodMetadata getFactoryMethodMetadata() {
+        return null;
     }
 
 }

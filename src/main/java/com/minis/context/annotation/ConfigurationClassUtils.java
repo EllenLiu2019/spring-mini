@@ -10,6 +10,7 @@ import com.minis.core.type.AnnotationMetadata;
 import com.minis.stereotype.Component;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Map;
 import java.util.Set;
 
 @Slf4j
@@ -50,12 +51,17 @@ public abstract class ConfigurationClassUtils {
             }
         }
 
-        AnnotationAttributes config = metadata.getAnnotationAttributes(Configuration.class.getName());
-        if (config != null) {
-            return !Boolean.FALSE.equals(config.get("proxyBeanMethods")) || isConfigurationCandidate(metadata);
+        Map<String, Object> config = metadata.getAnnotationAttributes(Configuration.class.getName());
+        if (config != null && !Boolean.FALSE.equals(config.get("proxyBeanMethods"))) {
+            beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_FULL);
+        } else if (config != null || Boolean.TRUE.equals(beanDef.getAttribute(CANDIDATE_ATTRIBUTE)) ||
+                isConfigurationCandidate(metadata)) {
+            beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_LITE);
+        } else {
+            return false;
         }
 
-        return false;
+        return true;
     }
 
     static boolean isConfigurationCandidate(AnnotationMetadata metadata) {
@@ -70,12 +76,12 @@ public abstract class ConfigurationClassUtils {
                 return true;
             }
         }
-        return false;
         // Finally, let's look for @Bean methods...
-        //return hasBeanMethods(metadata);
+        return hasBeanMethods(metadata);
     }
 
-    /*private static boolean hasBeanMethods(AnnotationMetadata metadata) {
-       return metadata.hasAnnotatedMethods(Bean.class.getName());
-    }*/
+
+    static boolean hasBeanMethods(AnnotationMetadata metadata) {
+        return metadata.hasAnnotatedMethods(Bean.class.getName());
+    }
 }

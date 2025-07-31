@@ -5,7 +5,6 @@ com.minis.boot.web.embedded.TomcatServletWebServerFactory
 com.minis.boot.web.servlet.DispatcherServletRegistrationBean
 com.minis.web.converter.DefaultHttpMessageConverter
 com.minis.utils.DefaultObjectMapper
-com.minis.test.mvc.DateInitializer
 com.minis.jdbc.pool.PooledDataSource
 com.minis.jdbc.core.JdbcTemplate
 com.minis.tx.transaction.TransactionManager

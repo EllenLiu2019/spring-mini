@@ -1,14 +1,29 @@
 package com.minis.beans.factory.config;
 
 import com.minis.beans.PropertyValues;
+import com.minis.beans.factory.support.AutowireCapableBeanFactory;
 import com.minis.beans.factory.support.ConfigurableBeanFactory;
+import com.minis.utils.ClassUtils;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.lang.reflect.Method;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class BeanDefinition {
 
     static String SCOPE_SINGLETON = ConfigurableBeanFactory.SCOPE_SINGLETON;
     static String SCOPE_PROTOTYPE = ConfigurableBeanFactory.SCOPE_PROTOTYPE;
+
+    public static final int AUTOWIRE_NO = AutowireCapableBeanFactory.AUTOWIRE_NO;
+
+    public static final int AUTOWIRE_BY_NAME = AutowireCapableBeanFactory.AUTOWIRE_BY_NAME;
+
+    public static final int AUTOWIRE_BY_TYPE = AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE;
+
+    public static final int AUTOWIRE_CONSTRUCTOR = AutowireCapableBeanFactory.AUTOWIRE_CONSTRUCTOR;
+
     private String scope = SCOPE_SINGLETON;
 
     private boolean lazyInit = false;
@@ -25,6 +40,12 @@ public class BeanDefinition {
     private volatile Object beanClass;
     private String factoryMethodName;
     private boolean primary;
+
+    private String factoryBeanName;
+
+    private int autowireMode = AUTOWIRE_NO;
+
+    private final Map<String, Object> attributes = new LinkedHashMap<>();
 
     public BeanDefinition(String id, String className) {
         this.id = id;
@@ -111,6 +132,10 @@ public class BeanDefinition {
         return this.factoryMethodName;
     }
 
+    public void setFactoryMethodName(String factoryMethodName) {
+        this.factoryMethodName = factoryMethodName;
+    }
+
     public void setPrimary(boolean primary) {
         this.primary = primary;
     }
@@ -119,4 +144,45 @@ public class BeanDefinition {
         return this.primary;
     }
 
+    public void setFactoryBeanName(String factoryBeanName) {
+        this.factoryBeanName = factoryBeanName;
+    }
+
+    public String getFactoryBeanName() {
+        return this.factoryBeanName;
+    }
+
+    public void setAutowireMode(int autowireMode) {
+        this.autowireMode = autowireMode;
+    }
+
+    public Object getAttribute(String name) {
+        return this.attributes.get(name);
+    }
+
+    public void setAttribute(String name, Object value) {
+        if (value != null) {
+            this.attributes.put(name, value);
+        } else {
+            removeAttribute(name);
+        }
+    }
+
+    public void removeAttribute(String name) {
+        this.attributes.remove(name);
+    }
+
+    public Class<?> resolveBeanClass(ClassLoader classLoader) throws ClassNotFoundException {
+        String className = getBeanClassName();
+        if (className == null) {
+            return null;
+        }
+        Class<?> resolvedClass = ClassUtils.forName(className, classLoader);
+        this.beanClass = resolvedClass;
+        return resolvedClass;
+    }
+
+    public boolean isFactoryMethod(Method candidate) {
+        return candidate.getName().equals(this.getFactoryMethodName());
+    }
 }

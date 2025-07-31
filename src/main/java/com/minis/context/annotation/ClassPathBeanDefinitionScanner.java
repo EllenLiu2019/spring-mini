@@ -2,6 +2,7 @@ package com.minis.context.annotation;
 
 import com.minis.beans.factory.annotation.AnnotatedBeanDefinition;
 import com.minis.beans.factory.config.BeanDefinition;
+import com.minis.beans.factory.config.BeanDefinitionHolder;
 import com.minis.beans.factory.support.BeanDefinitionRegistry;
 import com.minis.beans.factory.support.BeanNameGenerator;
 import com.minis.core.io.FileSystemResource;
@@ -50,16 +51,17 @@ public class ClassPathBeanDefinitionScanner {
         this.excludeFilters.add(excludeFilter);
     }
 
-    public Set<BeanDefinition> doScan(Set<String> basePackages) throws IOException {
-        Set<BeanDefinition> beanDefinitions = new LinkedHashSet<>();
+    public Set<BeanDefinitionHolder> doScan(Set<String> basePackages) throws IOException {
+        Set<BeanDefinitionHolder> beanDefinitions = new LinkedHashSet<>();
         for (String basePackage : basePackages) {
             Set<BeanDefinition> candidates = this.scanCandidateComponents(basePackage);
             for (BeanDefinition candidate : candidates) {
                 String beanName = this.beanNameGenerator.generateBeanName(candidate, this.registry);
+                BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(candidate, beanName);
                 if (candidate instanceof AnnotatedBeanDefinition annotatedBeanDefinition) {
                     AnnotationConfigUtils.processCommonDefinitionAnnotations(annotatedBeanDefinition);
                 }
-                beanDefinitions.add(candidate);
+                beanDefinitions.add(definitionHolder);
                 this.registry.registerBeanDefinition(beanName, candidate);
             }
         }

@@ -5,11 +5,14 @@ import com.minis.beans.PropertyValue;
 import com.minis.beans.PropertyValues;
 import com.minis.beans.factory.FactoryBean;
 import com.minis.beans.factory.config.*;
+import com.minis.utils.ReflectionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -59,10 +62,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
             this.earlySingletonObjects.put(beanName, obj);
 
-            String beanClassName = beanDefinition.getBeanClassName() != null ? beanDefinition.getBeanClassName() : beanDefinition.getId();
-            clz = Class.forName(beanClassName);
-
-            populateBean(beanDefinition, clz, obj);
+            populateBean(beanDefinition, obj);
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException(e);
         }
@@ -74,53 +74,85 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
         String beanClassName = bd.getBeanClassName() != null ? bd.getBeanClassName() : bd.getClassName();
         LOGGER.debug("creating Bean for: id = {}, classname = {}", bd.getId(), beanClassName);
         Class<?> clz;
-        Object obj;
-        Constructor<?> con;
-        clz = Class.forName(beanClassName);
         ConstructorArgumentValues conArgValues = bd.getConstructorArgumentValues();
         if (conArgValues != null && !conArgValues.isEmpty()) {
-            Class[] paramTypes = new Class[conArgValues.getArgumentCount()];
-            Object[] paramValues = new Object[conArgValues.getArgumentCount()];
-            for (int i = 0; i < conArgValues.getArgumentCount(); i++) {
-                ConstructorArgumentValue conArgValue = conArgValues.getIndexedArgumentValue(i);
-                if ("String".equals(conArgValue.getType()) || "java.lang.String".equals(conArgValue.getType())) {
-                    paramTypes[i] = String.class;
-                    paramValues[i] = conArgValue.getValue();
-                } else if ("Integer".equals(conArgValue.getType()) || "java.lang.Integer".equals(conArgValue.getType())) {
-                    paramTypes[i] = Integer.class;
-                    paramValues[i] = Integer.valueOf((String) conArgValue.getValue());
-                } else if ("int".equals(conArgValue.getType())) {
-                    paramTypes[i] = int.class;
-                    paramValues[i] = Integer.valueOf((String) conArgValue.getValue());
-                } else if ("String[]".equals(conArgValue.getType())) {
-                    paramTypes[i] = String[].class;
-                    paramValues[i] = conArgValue.getValue();
-                } else {
-                    paramTypes[i] = String.class;
-                    paramValues[i] = conArgValue.getValue();
+            clz = Class.forName(beanClassName);
+            return resolveByConstructorArgs(clz, conArgValues);
+        } else if (bd.getFactoryMethodName() != null) {
+            return instantiateUsingFactoryMethod(beanClassName, bd);
+        } else {
+            clz = Class.forName(beanClassName);
+            return createBeanInstance(beanClassName, clz, bd);
+        }
+    }
+
+    private Object instantiateUsingFactoryMethod(String beanClassName, BeanDefinition bd) {
+        List<Method> candidates = new ArrayList<>();
+        String factoryBeanName = bd.getFactoryBeanName();
+        try {
+            Object factoryBean = getBean(factoryBeanName);
+            if (factoryBean != null) {
+                Class<?> factoryClass = factoryBean.getClass();
+                Method[] rawCandidates = factoryClass.getMethods();
+                for (Method candidate : rawCandidates) {
+                    if (bd.isFactoryMethod(candidate)) {
+                        candidates.add(candidate);
+                    }
                 }
+                Method uniqueCandidate = candidates.get(0);
+                ReflectionUtils.makeAccessible(uniqueCandidate);
+                return uniqueCandidate.invoke(factoryBean);
             }
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException(e);
+        }
+        throw new BeansException("cannot instantiate using factory method for bean " + beanClassName);
+    }
+
+    private Object resolveByConstructorArgs(Class<?> clz, ConstructorArgumentValues conArgValues) {
+        Object obj;
+        Constructor<?> con;
+        Class<?>[] paramTypes = new Class[conArgValues.getArgumentCount()];
+        Object[] paramValues = new Object[conArgValues.getArgumentCount()];
+        for (int i = 0; i < conArgValues.getArgumentCount(); i++) {
+            ConstructorArgumentValue conArgValue = conArgValues.getIndexedArgumentValue(i);
+            if ("String".equals(conArgValue.getType()) || "java.lang.String".equals(conArgValue.getType())) {
+                paramTypes[i] = String.class;
+                paramValues[i] = conArgValue.getValue();
+            } else if ("Integer".equals(conArgValue.getType()) || "java.lang.Integer".equals(conArgValue.getType())) {
+                paramTypes[i] = Integer.class;
+                paramValues[i] = Integer.valueOf((String) conArgValue.getValue());
+            } else if ("int".equals(conArgValue.getType())) {
+                paramTypes[i] = int.class;
+                paramValues[i] = Integer.valueOf((String) conArgValue.getValue());
+            } else if ("String[]".equals(conArgValue.getType())) {
+                paramTypes[i] = String[].class;
+                paramValues[i] = conArgValue.getValue();
+            } else {
+                paramTypes[i] = String.class;
+                paramValues[i] = conArgValue.getValue();
+            }
+        }
+        try {
             con = clz.getDeclaredConstructor(paramTypes);
             con.setAccessible(true);
             obj = con.newInstance(paramValues);
-        } else {
-            obj = createBeanInstance(beanClassName, clz, bd);
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException(e);
         }
-
-        LOGGER.debug("bean created: id = {}, className = {}, obj = {}", bd.getId(), beanClassName, obj);
-
         return obj;
     }
 
     //TODO: handle property values
-    private void populateBean(BeanDefinition beanDefinition, Class<?> clz, Object obj) {
-        handleProperties(beanDefinition, clz, obj);
+    private void populateBean(BeanDefinition beanDefinition, Object obj) {
+        handleProperties(beanDefinition, obj);
     }
 
-    private void handleProperties(BeanDefinition beanDefinition, Class<?> clz, Object obj) {
+    private void handleProperties(BeanDefinition beanDefinition, Object obj) {
         PropertyValues propertyValues = beanDefinition.getPropertyValues();
         if (propertyValues != null && !propertyValues.isEmpty()) {
-            LOGGER.debug("populating Bean : id = {}, className = {}", beanDefinition.getId(), beanDefinition.getClassName());
+            String beanClassName = beanDefinition.getBeanClassName() != null ? beanDefinition.getBeanClassName() : beanDefinition.getId();
+            LOGGER.debug("populating Bean : id = {}, className = {}", beanDefinition.getId(), beanClassName);
 
             for (int i = 0; i < propertyValues.size(); i++) {
                 PropertyValue pv = propertyValues.getPropertyValueList().get(i);
@@ -152,7 +184,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
                     }
 
                     String methodName = "set" + pv.getName().substring(0, 1).toUpperCase() + pv.getName().substring(1);
-                    Method method = clz.getMethod(methodName, paramTypes);
+                    Method method = Class.forName(beanClassName).getMethod(methodName, paramTypes);
 
                     method.invoke(obj, paramValues);
                 } catch (ReflectiveOperationException | BeansException e) {
@@ -203,9 +235,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
         this.removeSingleton(name);
     }
 
-    public BeanDefinition getBeanDefinition(String name) {
-        return this.beanDefinitionMap.get(name);
-    }
+    public abstract BeanDefinition getBeanDefinition(String name) throws BeansException;
 
     @Override
     public boolean containsBeanDefinition(String name) {

@@ -9,6 +9,7 @@ import com.minis.beans.factory.support.RootBeanDefinition;
 import com.minis.context.support.GenericApplicationContext;
 import com.minis.core.annotation.AnnotationAttributes;
 import com.minis.core.type.AnnotationMetadata;
+import com.minis.core.type.MethodMetadata;
 
 import java.util.Set;
 
@@ -69,5 +70,9 @@ public abstract class AnnotationConfigUtils {
         if (metadata.isAnnotated(Primary.class.getName())) {
             abd.setPrimary(true);
         }
+    }
+
+    public static AnnotationAttributes attributesFor(MethodMetadata metadata, Class<Bean> annotationType) {
+        return AnnotationAttributes.fromMap(metadata.getAnnotationAttributes(annotationType.getName()));
     }
 }

@@ -10,11 +10,11 @@ import static com.minis.core.annotation.AnnotationTypeMappings.isIgnorable;
 
 public class TypeMappedAnnotations implements MergedAnnotations {
 
-    private final Object source; // App.class
+    private final Object source; // 类 & 方法
 
-    private final AnnotatedElement element; // App.class
+    private final AnnotatedElement element; // 类 & 方法
 
-    private List<AnnotationTypeMappings> aggregates; // App.class 的注解元数据列表，因App.class只有 @SpringBootApplication，所以aggregates只有一个元素
+    private List<AnnotationTypeMappings> aggregates;
 
 
     public TypeMappedAnnotations(AnnotatedElement element) {
@@ -24,7 +24,7 @@ public class TypeMappedAnnotations implements MergedAnnotations {
 
     @Override
     public <A extends Annotation> MergedAnnotation<A> get(String annotationType, Predicate<? super MergedAnnotation<A>> predicate) {
-        Set<Annotation> annotations = this.getDeclaredAnnotations(); // 有且只有@SpringBootApplication一个注解
+        Set<Annotation> annotations = this.getDeclaredAnnotations();
         for (Annotation annotation : annotations) {
             AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(annotation.annotationType());
             for (int i = 0; i < mappings.size(); i++) {
@@ -90,6 +90,8 @@ public class TypeMappedAnnotations implements MergedAnnotations {
         return false;
     }
 
+    // App.class -> @SpringBootApplication
+    // greeting -> @Bean
     private Set<Annotation> getDeclaredAnnotations() {
         Set<Annotation> result = new LinkedHashSet<>();
         Annotation[] annotations = this.element.getDeclaredAnnotations();

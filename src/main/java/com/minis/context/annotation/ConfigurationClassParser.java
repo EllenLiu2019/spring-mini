@@ -6,6 +6,7 @@ import com.minis.beans.factory.config.BeanDefinitionHolder;
 import com.minis.beans.factory.support.BeanDefinitionRegistry;
 import com.minis.core.annotation.AnnotationAttributes;
 import com.minis.core.type.AnnotationMetadata;
+import com.minis.core.type.MethodMetadata;
 import com.minis.core.type.StandardAnnotationMetadata;
 import com.minis.core.type.classreading.MetadataReader;
 import com.minis.utils.ClassUtils;
@@ -131,14 +132,14 @@ class ConfigurationClassParser {
             for (AnnotationAttributes componentScan : componentScans) {
                 // TODO: The config class is annotated with @ComponentScan -> perform the scan immediately,
                 //  All configuration class will be found and constructed as beanDefinition and registered into registry
-                Set<BeanDefinition> scannedBeanDefinitions =
+                Set<BeanDefinitionHolder> scannedBeanDefinitions =
                         this.componentScanParser.parse(componentScan, sourceClass.getMetadata().getClassName());
                 // TODO: Check the set of scanned beanDefinitions for any further config classes,
                 //  because these config classes should be parsed recursively
-                for (BeanDefinition bdCand : scannedBeanDefinitions) {
-                    if (ConfigurationClassUtils.checkConfigurationClassCandidate(bdCand)) {
+                for (BeanDefinitionHolder bdCand : scannedBeanDefinitions) {
+                    if (ConfigurationClassUtils.checkConfigurationClassCandidate(bdCand.getBeanDefinition())) {
                         // TODO: 对于进行包扫描后，新扫描到的配置类进行递归解析
-                        parse((AnnotatedBeanDefinition) bdCand, bdCand.getClassName());
+                        parse((AnnotatedBeanDefinition) bdCand.getBeanDefinition(), bdCand.getBeanName());
                     }
                 }
             }
@@ -151,13 +152,10 @@ class ConfigurationClassParser {
         processImports(configClass, sourceClass, getImports(sourceClass), filter, true);
 
         // TODO：@Bean methods process
-        /*Set<MethodMetadata> beanMethods = retrieveBeanMethodMetadata(sourceClass);
+        Set<MethodMetadata> beanMethods = retrieveBeanMethodMetadata(sourceClass);
         for (MethodMetadata methodMetadata : beanMethods) {
-            if (methodMetadata.isAnnotated("kotlin.jvm.JvmStatic") && !methodMetadata.isStatic()) {
-                continue;
-            }
             configClass.addBeanMethod(new BeanMethod(methodMetadata, configClass));
-        }*/
+        }
 
         //processInterfaces(configClass, sourceClass);
 
@@ -204,9 +202,12 @@ class ConfigurationClassParser {
         }
     }
 
-    /*private Set<MethodMetadata> retrieveBeanMethodMetadata(SourceClass sourceClass) {
-        // TODO: 找到 类中带有 @Bean 的方法集合
-    }*/
+    // Retrieve metadata for @Bean methods
+    private Set<MethodMetadata> retrieveBeanMethodMetadata(SourceClass sourceClass) {
+        AnnotationMetadata original = sourceClass.getMetadata();
+        Set<MethodMetadata> beanMethods = original.getAnnotatedMethods(Bean.class.getName());
+        return beanMethods;
+    }
 
     // TODO: importCandidates
     //  ------------------------------------------------

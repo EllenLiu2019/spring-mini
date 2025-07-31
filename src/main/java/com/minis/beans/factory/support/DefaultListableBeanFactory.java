@@ -1,7 +1,9 @@
 package com.minis.beans.factory.support;
 
 import com.minis.beans.BeansException;
+import com.minis.beans.factory.annotation.AnnotatedBeanDefinition;
 import com.minis.beans.factory.config.BeanDefinition;
+import com.minis.core.type.MethodMetadata;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -25,17 +27,26 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
     public String[] getBeanDefinitionNames() {
         return this.beanDefinitionNames.toArray(new String[0]);
     }
+
     @Override
     public String[] getBeanNamesForType(Class<?> type) {
         List<String> result = new ArrayList<>();
         for (String beanName : this.beanDefinitionNames) {
-            BeanDefinition beanDefinition = this.getBeanDefinition(beanName);
+            String beanClassName = null;
             Class<?> classToMatch;
-            try {
-                String beanClassName = beanDefinition.getBeanClassName();
-                if (beanClassName == null) {
-                    beanClassName = beanDefinition.getClassName();
+            BeanDefinition beanDefinition = this.getBeanDefinition(beanName);
+            if (beanDefinition.getFactoryMethodName() != null) {
+                if (beanDefinition instanceof AnnotatedBeanDefinition annotatedBeanDefinition) {
+                    MethodMetadata methodMetadata = annotatedBeanDefinition.getFactoryMethodMetadata();
+                    beanClassName = methodMetadata.getReturnTypeName();
                 }
+            }
+            if (beanClassName == null) {
+                beanClassName = beanDefinition.getBeanClassName() == null ?
+                        beanDefinition.getClassName() : beanDefinition.getBeanClassName();
+            }
+
+            try {
                 classToMatch = Class.forName(beanClassName);
                 if (type.isAssignableFrom(classToMatch)) {
                     result.add(beanName);
@@ -45,6 +56,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
         }
         return result.toArray(new String[0]);
     }
+
     @SuppressWarnings("unchecked")
     @Override
     public <T> Map<String, T> getBeansOfType(Class<T> type) throws BeansException, ReflectiveOperationException {
@@ -56,9 +68,11 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
         }
         return result;
     }
+
     public void setParent(ConfigurableListableBeanFactory beanFactory) {
         this.parentBeanFactory = beanFactory;
     }
+
     @Override
     public Object getBean(String beanName) throws ReflectiveOperationException, BeansException {
         Object result = super.getBean(beanName);
@@ -68,6 +82,16 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
             LOGGER.debug("got bean={} from IoC, result={}", beanName, result.getClass());
         }
         return result;
+    }
+
+    @Override
+    public BeanDefinition getBeanDefinition(String beanName) throws BeansException {
+        BeanDefinition bd = this.beanDefinitionMap.get(beanName);
+        if (bd == null) {
+            LOGGER.trace("No bean named '" + beanName + "' found in " + this);
+            throw new BeansException(beanName);
+        }
+        return bd;
     }
 
     @Override

@@ -14,6 +14,8 @@ public final class ConfigurationClass {
 
     private String beanName;
 
+    private final Set<BeanMethod> beanMethods = new LinkedHashSet<>();
+
     private final Map<ImportBeanDefinitionRegistrar, AnnotationMetadata> importBeanDefinitionRegistrars =
             new LinkedHashMap<>();
 
@@ -47,5 +49,17 @@ public final class ConfigurationClass {
 
     void setBeanName(String beanName) {
         this.beanName = beanName;
+    }
+
+    void addBeanMethod(BeanMethod method) {
+        this.beanMethods.add(method);
+    }
+
+    Set<BeanMethod> getBeanMethods() {
+        return this.beanMethods;
+    }
+
+    String getBeanName() {
+        return this.beanName;
     }
 }

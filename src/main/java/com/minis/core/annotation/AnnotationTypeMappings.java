@@ -81,8 +81,8 @@ public class AnnotationTypeMappings {
 
 
     /**
-     * @param annotationType 仅为主类上的 @SpringBootApplication 注解
-     * @return {@link AnnotationTypeMappings} @SpringBootApplication 中的注解元信息
+     * @param annotationType
+     * @return {@link AnnotationTypeMappings} 注解元信息
      */
     static AnnotationTypeMappings forAnnotationType(Class<? extends Annotation> annotationType) {
         return forAnnotationType(annotationType, new HashSet<>());
