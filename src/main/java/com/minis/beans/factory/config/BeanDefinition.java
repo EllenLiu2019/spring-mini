@@ -3,6 +3,7 @@ package com.minis.beans.factory.config;
 import com.minis.beans.PropertyValues;
 import com.minis.beans.factory.support.AutowireCapableBeanFactory;
 import com.minis.beans.factory.support.ConfigurableBeanFactory;
+import com.minis.core.io.Resource;
 import com.minis.utils.ClassUtils;
 import lombok.Getter;
 import lombok.Setter;
@@ -46,6 +47,8 @@ public class BeanDefinition {
     private int autowireMode = AUTOWIRE_NO;
 
     private final Map<String, Object> attributes = new LinkedHashMap<>();
+
+    private Resource resource;
 
     public BeanDefinition(String id, String className) {
         this.id = id;
@@ -91,8 +94,8 @@ public class BeanDefinition {
         this.id = id;
     }
 
-    public void setClassName(String className) {
-        this.className = className;
+    public void setClassName(String beanClassName) {
+        this.beanClass = beanClassName;
     }
 
     public boolean isSingleton() {
@@ -126,6 +129,10 @@ public class BeanDefinition {
     public String getBeanClassName() {
         Object beanClassObject = this.beanClass;  // defensive access to volatile beanClass field
         return (beanClassObject instanceof Class<?> clazz ? clazz.getName() : (String) beanClassObject);
+    }
+
+    public void setBeanClassName(String beanClassName) {
+        this.beanClass = beanClassName;
     }
 
     public String getFactoryMethodName() {
@@ -184,5 +191,13 @@ public class BeanDefinition {
 
     public boolean isFactoryMethod(Method candidate) {
         return candidate.getName().equals(this.getFactoryMethodName());
+    }
+
+    public void setResource(Resource resource) {
+        this.resource = resource;
+    }
+
+    public Resource getResource() {
+        return this.resource;
     }
 }

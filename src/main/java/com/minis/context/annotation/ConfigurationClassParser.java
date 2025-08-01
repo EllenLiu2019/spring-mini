@@ -9,6 +9,7 @@ import com.minis.core.type.AnnotationMetadata;
 import com.minis.core.type.MethodMetadata;
 import com.minis.core.type.StandardAnnotationMetadata;
 import com.minis.core.type.classreading.MetadataReader;
+import com.minis.core.type.classreading.MetadataReaderFactory;
 import com.minis.utils.ClassUtils;
 import com.minis.utils.CollectionUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +25,7 @@ import java.util.function.Predicate;
 class ConfigurationClassParser {
 
     private static final Predicate<String> DEFAULT_EXCLUSION_FILTER = className ->
-            (className.startsWith("java.lang.annotation.") || className.startsWith("org.springframework.stereotype."));
+            (className.startsWith("java.lang.annotation.") || className.startsWith("com.minis.stereotype."));
 
     private final BeanDefinitionRegistry registry;
     private final ComponentScanAnnotationParser componentScanParser;
@@ -34,10 +35,11 @@ class ConfigurationClassParser {
     private final Map<String, ConfigurationClass> knownSuperclasses = new LinkedHashMap<>();
     private final DeferredImportSelectorHandler deferredImportSelectorHandler = new DeferredImportSelectorHandler();
     private SourceClass objectSourceClass = new SourceClass(Object.class);
-    //private ImportStack importStack = new ImportStack();
+    private final MetadataReaderFactory metadataReaderFactory;
 
 
-    public ConfigurationClassParser(BeanDefinitionRegistry registry) {
+    public ConfigurationClassParser(MetadataReaderFactory metadataReaderFactory, BeanDefinitionRegistry registry) {
+        this.metadataReaderFactory = metadataReaderFactory;
         this.registry = registry;
         this.componentScanParser = new ComponentScanAnnotationParser(registry);
     }
@@ -78,7 +80,6 @@ class ConfigurationClassParser {
         try {
             sourceClass = asSourceClass(configClass, filter);
             do {
-                assert sourceClass != null;
                 sourceClass = doProcessConfigurationClass(configClass, sourceClass, filter);
             }
             while (sourceClass != null);
@@ -94,7 +95,7 @@ class ConfigurationClassParser {
         if (metadata instanceof StandardAnnotationMetadata standardAnnotationMetadata) {
             return asSourceClass(standardAnnotationMetadata.getIntrospectedClass());
         }
-        return null;
+        return asSourceClass(metadata.getClassName(), filter);
     }
 
     SourceClass asSourceClass(Class<?> classType, Predicate<String> filter) {
@@ -104,17 +105,20 @@ class ConfigurationClassParser {
         return new SourceClass(classType);
     }
 
-    SourceClass asSourceClass(String className, Predicate<String> filter) {
+    SourceClass asSourceClass(String className, Predicate<String> filter) throws IOException {
         if (className == null || filter.test(className)) {
             return this.objectSourceClass;
         }
-        try {
-            return new SourceClass(ClassUtils.forName(className, this.getClass().getClassLoader()));
-        } catch (ClassNotFoundException e) {
-            //throw new RuntimeException(e);
-            log.trace("Class not found: " + className);
-            return null;
+        if (className.startsWith("java")) {
+            try {
+                return new SourceClass(ClassUtils.forName(className, this.getClass().getClassLoader()));
+            } catch (ClassNotFoundException e) {
+                //throw new RuntimeException(e);
+                log.trace("Class not found: " + className);
+                return null;
+            }
         }
+        return new SourceClass(this.metadataReaderFactory.getMetadataReader(className));
     }
 
     SourceClass asSourceClass(Class<?> classType) {
@@ -133,7 +137,7 @@ class ConfigurationClassParser {
                 // TODO: The config class is annotated with @ComponentScan -> perform the scan immediately,
                 //  All configuration class will be found and constructed as beanDefinition and registered into registry
                 Set<BeanDefinitionHolder> scannedBeanDefinitions =
-                        this.componentScanParser.parse(componentScan, sourceClass.getMetadata().getClassName());
+                        this.componentScanParser.parse(componentScan, sourceClass.getMetadata().getClassName(), this.metadataReaderFactory);
                 // TODO: Check the set of scanned beanDefinitions for any further config classes,
                 //  because these config classes should be parsed recursively
                 for (BeanDefinitionHolder bdCand : scannedBeanDefinitions) {
@@ -362,7 +366,7 @@ class ConfigurationClassParser {
 
     }
 
-    private Collection<SourceClass> asSourceClasses(String[] classNames, Predicate<String> filter) {
+    private Collection<SourceClass> asSourceClasses(String[] classNames, Predicate<String> filter) throws IOException {
         List<SourceClass> annotatedClasses = new ArrayList<>(classNames.length);
         for (String className : classNames) {
             SourceClass sourceClass = asSourceClass(className, filter);
@@ -441,12 +445,12 @@ class ConfigurationClassParser {
             return this.metadata;
         }
 
-        public SourceClass getSuperClass() {
+        public SourceClass getSuperClass() throws IOException {
             if (this.source instanceof Class<?> sourceClass) {
                 return asSourceClass(sourceClass.getSuperclass(), DEFAULT_EXCLUSION_FILTER);
             }
-            log.error("source is not a Class, ignore...");
-            throw new RuntimeException("source is not a Class");
+            return asSourceClass(
+                    ((MetadataReader) this.source).getClassMetadata().getSuperClassName(), DEFAULT_EXCLUSION_FILTER);
         }
 
         public Set<SourceClass> getAnnotations() {
@@ -478,7 +482,7 @@ class ConfigurationClassParser {
             return result;
         }
 
-        private SourceClass getRelated(String className) {
+        private SourceClass getRelated(String className) throws IOException {
             return asSourceClass(className, DEFAULT_EXCLUSION_FILTER);
         }
 
@@ -513,7 +517,7 @@ class ConfigurationClassParser {
             if (this.source instanceof Class<?> sourceClass) {
                 return new ConfigurationClass(sourceClass, importedBy);
             }
-            return null;
+            return new ConfigurationClass((MetadataReader) this.source, importedBy);
         }
 
         @Override

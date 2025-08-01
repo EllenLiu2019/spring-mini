@@ -2,6 +2,7 @@ package com.minis.core.annotation;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -17,4 +18,9 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
     boolean isPresent(String annotationName);
 
     <A extends Annotation> List<MergedAnnotation<A>> getMergedAnnotations();
+
+    static MergedAnnotations of(Collection<MergedAnnotation<?>> annotations) {
+        return MergedAnnotationsCollection.of(annotations);
+    }
+
 }

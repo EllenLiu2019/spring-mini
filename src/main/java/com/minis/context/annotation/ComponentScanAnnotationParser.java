@@ -1,9 +1,9 @@
 package com.minis.context.annotation;
 
-import com.minis.beans.factory.config.BeanDefinition;
 import com.minis.beans.factory.config.BeanDefinitionHolder;
 import com.minis.beans.factory.support.BeanDefinitionRegistry;
 import com.minis.core.annotation.AnnotationAttributes;
+import com.minis.core.type.classreading.MetadataReaderFactory;
 import com.minis.utils.ClassUtils;
 
 import java.io.IOException;
@@ -18,8 +18,9 @@ class ComponentScanAnnotationParser {
         this.registry = registry;
     }
 
-    public Set<BeanDefinitionHolder> parse(AnnotationAttributes componentScan, String declaringClass) throws IOException {
-        ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(this.registry);
+    public Set<BeanDefinitionHolder> parse(AnnotationAttributes componentScan, String declaringClass,
+                                           MetadataReaderFactory metadataReaderFactory) throws IOException {
+        ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(this.registry, metadataReaderFactory);
         Set<String> basePackages = new LinkedHashSet<>();
         String[] basePackagesArray = componentScan.getStringArray("basePackages");
         for (String basePackage : basePackagesArray) {

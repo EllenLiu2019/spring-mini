@@ -6,6 +6,7 @@ import com.minis.context.annotation.Bean;
 import com.minis.context.annotation.Configuration;
 import com.minis.test.mvc.DateInitializer;
 import com.minis.web.bind.support.WebBindingInitializer;
+import com.minis.web.servlet.DispatcherServlet;
 
 @Configuration
 public class AppConfig {
@@ -18,6 +19,11 @@ public class AppConfig {
     @Bean
     public Pointcut nameMatchMethodPointcut() {
         return new NameMatchMethodPointcut("do*");
+    }
+
+    @Bean
+    public DispatcherServlet dispatcherServlet() {
+        return new DispatcherServlet();
     }
 
 }

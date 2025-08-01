@@ -20,6 +20,8 @@ public class AnnotatedGenericBeanDefinition extends BeanDefinition implements An
     public AnnotatedGenericBeanDefinition(AnnotationMetadata metadata) {
         if (metadata instanceof StandardAnnotationMetadata sam) {
             setBeanClass(sam.getIntrospectedClass());
+        } else {
+            setBeanClassName(metadata.getClassName());
         }
         this.metadata = metadata;
     }

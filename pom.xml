@@ -20,7 +20,8 @@
         <log4j.version>2.24.3</log4j.version>
         <mysql.version>9.2.0</mysql.version>
         <spring-boot.version>3.5.3</spring-boot.version>
-        <cglib-nodep.version>3.3.0</cglib-nodep.version>
+        <cglib.version>3.3.0</cglib.version>
+        <asm.version>9.8</asm.version>
     </properties>
 
     <dependencies>
@@ -61,8 +62,13 @@
         </dependency>
         <dependency>
             <groupId>cglib</groupId>
-            <artifactId>cglib-nodep</artifactId>
-            <version>${cglib-nodep.version}</version>
+            <artifactId>cglib</artifactId>
+            <version>${cglib.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ow2.asm</groupId>
+            <artifactId>asm</artifactId>
+            <version>${asm.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

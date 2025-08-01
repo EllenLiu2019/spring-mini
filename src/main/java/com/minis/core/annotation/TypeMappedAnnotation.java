@@ -52,9 +52,10 @@ public class TypeMappedAnnotation<A extends Annotation> implements MergedAnnotat
 
     /**
      * 获取注解所有属性值并封装成Map
+     *
      * @param factory 初始化封装对象的工厂方法
+     * @param <T>     AnnotationAttributes
      * @return 注解信息，包含： name & type & 属性值的Map
-     * @param <T> AnnotationAttributes
      */
     @Override
     public <T extends Map<String, Object>> T asMap(Function<MergedAnnotation<?>, T> factory) {
@@ -64,7 +65,7 @@ public class TypeMappedAnnotation<A extends Annotation> implements MergedAnnotat
             Method attribute = attributes.get(i);
             Object value = getValue(attribute);
             if (value != null) {
-                map.put(attribute.getName(),value);
+                map.put(attribute.getName(), value);
             }
         }
         return map;
@@ -93,6 +94,11 @@ public class TypeMappedAnnotation<A extends Annotation> implements MergedAnnotat
     @Override
     public int getDistance() {
         return this.mapping.getDistance();
+    }
+
+    static <A extends Annotation> MergedAnnotation<A> of(Object source, Class<A> annotationType, Map<String, ?> attributes) {
+        AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(annotationType);
+        return new TypeMappedAnnotation<>(mappings.get(0), source, attributes);
     }
 
 }

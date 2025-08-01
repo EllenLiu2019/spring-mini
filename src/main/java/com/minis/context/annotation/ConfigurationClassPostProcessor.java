@@ -13,6 +13,8 @@ import com.minis.beans.factory.support.BeanNameGenerator;
 import com.minis.beans.factory.support.ConfigurableListableBeanFactory;
 import com.minis.core.type.AnnotationMetadata;
 import com.minis.core.type.MethodMetadata;
+import com.minis.core.type.classreading.CachingMetadataReaderFactory;
+import com.minis.core.type.classreading.MetadataReaderFactory;
 import com.minis.utils.ClassUtils;
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,6 +30,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
             FullyQualifiedAnnotationBeanNameGenerator.INSTANCE;
 
     private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
+
+    private MetadataReaderFactory metadataReaderFactory = new CachingMetadataReaderFactory();
 
     private final Set<Integer> factoriesPostProcessed = new HashSet<>();
 
@@ -138,7 +142,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
         }
 
         // Parse each @Configuration class
-        ConfigurationClassParser parser = new ConfigurationClassParser(registry);
+        ConfigurationClassParser parser = new ConfigurationClassParser(this.metadataReaderFactory, registry);
 
         Set<BeanDefinitionHolder> candidates = new LinkedHashSet<>(configCandidates);
         parser.parse(candidates);

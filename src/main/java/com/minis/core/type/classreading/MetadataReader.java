@@ -2,7 +2,12 @@ package com.minis.core.type.classreading;
 
 import com.minis.core.io.Resource;
 import com.minis.core.type.AnnotationMetadata;
+import com.minis.core.type.ClassMetadata;
 
+/**
+ * Simple facade for accessing class metadata,
+ * as read by an ASM {@link org.objectweb.asm.ClassVisitor;}
+ */
 public interface MetadataReader {
 
     /**
@@ -13,7 +18,7 @@ public interface MetadataReader {
     /**
      * Read basic class metadata for the underlying class.
      */
-    //ClassMetadata getClassMetadata();
+    ClassMetadata getClassMetadata();
 
     /**
      * Read full annotation metadata for the underlying class,

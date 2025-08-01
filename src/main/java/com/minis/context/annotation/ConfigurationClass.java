@@ -2,6 +2,7 @@ package com.minis.context.annotation;
 
 import com.minis.core.io.Resource;
 import com.minis.core.type.AnnotationMetadata;
+import com.minis.core.type.classreading.MetadataReader;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -11,6 +12,8 @@ import java.util.Set;
 public final class ConfigurationClass {
 
     private final AnnotationMetadata metadata;
+
+    private Resource resource;
 
     private String beanName;
 
@@ -23,6 +26,12 @@ public final class ConfigurationClass {
 
     ConfigurationClass(Class<?> clazz, ConfigurationClass importedBy) {
         this.metadata = AnnotationMetadata.introspect(clazz);
+        this.importedBy.add(importedBy);
+    }
+
+    ConfigurationClass(MetadataReader metadataReader, ConfigurationClass importedBy) {
+        this.metadata = metadataReader.getAnnotationMetadata();
+        this.resource = metadataReader.getResource();
         this.importedBy.add(importedBy);
     }
 

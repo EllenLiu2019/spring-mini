@@ -10,16 +10,27 @@ import static com.minis.core.annotation.AnnotationTypeMappings.isIgnorable;
 
 public class TypeMappedAnnotations implements MergedAnnotations {
 
+    static final MergedAnnotations NONE = new TypeMappedAnnotations(null, new Annotation[0]);
+
     private final Object source; // 类 & 方法
 
     private final AnnotatedElement element; // 类 & 方法
 
     private List<AnnotationTypeMappings> aggregates;
 
+    private final Annotation[] annotations;
+
 
     public TypeMappedAnnotations(AnnotatedElement element) {
         this.source = element;
         this.element = element;
+        this.annotations = null;
+    }
+
+    private TypeMappedAnnotations(Object source, Annotation[] annotations) {
+        this.source = source;
+        this.element = null;
+        this.annotations = annotations;
     }
 
     @Override
@@ -93,6 +104,7 @@ public class TypeMappedAnnotations implements MergedAnnotations {
     // App.class -> @SpringBootApplication
     // greeting -> @Bean
     private Set<Annotation> getDeclaredAnnotations() {
+        if (this.element == null) return Collections.emptySet();
         Set<Annotation> result = new LinkedHashSet<>();
         Annotation[] annotations = this.element.getDeclaredAnnotations();
         for (Annotation annotation : annotations) {

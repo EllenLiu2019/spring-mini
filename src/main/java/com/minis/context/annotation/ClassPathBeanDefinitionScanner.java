@@ -7,14 +7,15 @@ import com.minis.beans.factory.support.BeanDefinitionRegistry;
 import com.minis.beans.factory.support.BeanNameGenerator;
 import com.minis.core.io.FileSystemResource;
 import com.minis.core.io.Resource;
+import com.minis.core.type.AnnotationMetadata;
+import com.minis.core.type.classreading.MetadataReader;
+import com.minis.core.type.classreading.MetadataReaderFactory;
 import com.minis.utils.ClassUtils;
 import com.minis.utils.ResourceUtils;
 import com.minis.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Modifier;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.FileVisitOption;
@@ -35,7 +36,6 @@ import java.util.stream.Stream;
 @Slf4j
 public class ClassPathBeanDefinitionScanner {
 
-    private static final String RESOURCE_PREFIX = "com";
     private static final String RESOURCE_SUFFIX = ".class";
     private final BeanDefinitionRegistry registry;
 
@@ -43,8 +43,11 @@ public class ClassPathBeanDefinitionScanner {
 
     private final List<String> excludeFilters = new ArrayList<>();
 
-    public ClassPathBeanDefinitionScanner(BeanDefinitionRegistry registry) {
+    private final MetadataReaderFactory metadataReaderFactory;
+
+    public ClassPathBeanDefinitionScanner(BeanDefinitionRegistry registry, MetadataReaderFactory metadataReaderFactory) {
         this.registry = registry;
+        this.metadataReaderFactory = metadataReaderFactory;
     }
 
     public void addExcludeFilter(String excludeFilter) {
@@ -96,42 +99,24 @@ public class ClassPathBeanDefinitionScanner {
         return result;
     }
 
-    Set<BeanDefinition> selectCandidates(Set<Resource> resources) {
+    Set<BeanDefinition> selectCandidates(Set<Resource> resources) throws IOException {
         Set<BeanDefinition> candidates = new LinkedHashSet<>();
         for (Resource resource : resources) {
-            String path = ((FileSystemResource) resource).getPath().replace(File.separator, ".");
-            String className = path.substring(path.indexOf(RESOURCE_PREFIX), path.length() - 6);
-            try {
-                Class<?> clazz = Class.forName(className);
-                if (isInstantiable(clazz) && !this.excludeFilters.contains(className)) {
-                    ScannedGenericBeanDefinition beanDefinition = new ScannedGenericBeanDefinition(clazz);
-                    if (ConfigurationClassUtils.isConfigurationCandidate(beanDefinition.getMetadata())) {
-                        candidates.add(beanDefinition);
-                    }
+            MetadataReader metadataReader = this.metadataReaderFactory.getMetadataReader(resource);
+            String className = metadataReader.getClassMetadata().getClassName();
+            if (!this.excludeFilters.contains(className)) {
+                ScannedGenericBeanDefinition beanDefinition = new ScannedGenericBeanDefinition(metadataReader);
+                if (isCandidateComponent(beanDefinition)) {
+                    candidates.add(beanDefinition);
                 }
-            } catch (ClassNotFoundException e) {
-                throw new RuntimeException(e);
             }
         }
         return candidates;
     }
 
-    public boolean isInstantiable(Class<?> clazz) {
-        return !clazz.isInterface() &&
-                !Modifier.isAbstract(clazz.getModifiers()) &&
-                !clazz.isEnum() &&
-                !clazz.isArray() &&
-                !clazz.isPrimitive() &&
-                hasNoArgsConstructor(clazz);
-    }
-
-    private boolean hasNoArgsConstructor(Class<?> clazz) {
-        try {
-            clazz.getDeclaredConstructor();
-            return true;
-        } catch (NoSuchMethodException e) {
-            return false;
-        }
+    protected boolean isCandidateComponent(AnnotatedBeanDefinition beanDefinition) {
+        AnnotationMetadata metadata = beanDefinition.getMetadata();
+        return metadata.isIndependent() && metadata.isConcrete();
     }
 
     public final BeanDefinitionRegistry getRegistry() {

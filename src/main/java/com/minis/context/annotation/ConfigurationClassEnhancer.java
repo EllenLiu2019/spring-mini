@@ -2,7 +2,6 @@ package com.minis.context.annotation;
 
 import com.minis.beans.BeansException;
 import lombok.extern.slf4j.Slf4j;
-import net.sf.cglib.core.CodeGenerationException;
 import net.sf.cglib.proxy.*;
 
 import java.lang.reflect.Method;
