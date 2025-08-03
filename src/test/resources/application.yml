@@ -1,0 +1,14 @@
+server:
+  port: 8088
+
+spring:
+  application:
+    name: spring-mini
+
+datasource:
+  spring-mini:
+    jdbc-url: jdbc:test://mock:1000/spring-mini
+    username: username
+    password: password
+
+

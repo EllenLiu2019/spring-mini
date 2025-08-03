@@ -2,9 +2,12 @@ package com.minis.context.annotation;
 
 import com.minis.app.App;
 import com.minis.beans.factory.config.BeanDefinition;
+import com.minis.beans.factory.config.BeanDefinitionHolder;
 import com.minis.beans.factory.support.BeanDefinitionRegistry;
 import com.minis.beans.factory.support.DefaultListableBeanFactory;
 import com.minis.core.io.Resource;
+import com.minis.core.type.classreading.CachingMetadataReaderFactory;
+import com.minis.core.type.classreading.MetadataReaderFactory;
 import com.minis.utils.ClassUtils;
 import org.junit.jupiter.api.Test;
 
@@ -21,7 +24,8 @@ import static org.junit.jupiter.api.Assertions.*;
 class ClassPathBeanDefinitionScannerTest {
 
     BeanDefinitionRegistry registry = new DefaultListableBeanFactory();
-    ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(registry);
+    private MetadataReaderFactory metadataReaderFactory = new CachingMetadataReaderFactory();
+    ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(registry, metadataReaderFactory);
 
     String packageName = ClassUtils.getPackageName(App.class.getName());
 
@@ -43,7 +47,7 @@ class ClassPathBeanDefinitionScannerTest {
 
     @Test
     void test_doScan() throws IOException {
-        Set<BeanDefinition> beanDefinitions = scanner.doScan(Set.of(packageName));
+        Set<BeanDefinitionHolder> beanDefinitions = scanner.doScan(Set.of(packageName));
         assertFalse(beanDefinitions.isEmpty());
         assertNotNull(registry.getBeanDefinition("appConfig"));
     }
