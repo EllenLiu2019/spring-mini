@@ -45,4 +45,6 @@ public abstract class PropertySource<T> {
 
     }
 
+    public abstract String[] getPropertyNames();
+
 }

@@ -10,7 +10,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public class YamlPropertySourceLoader {
+public class YamlPropertySourceLoader implements PropertySourceLoader {
 
     public List<PropertySource<?>> load() throws IOException {
         List<Map<String, Object>> loaded = new YamlProcessor().load();

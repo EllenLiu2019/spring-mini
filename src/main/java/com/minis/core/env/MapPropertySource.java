@@ -1,5 +1,7 @@
 package com.minis.core.env;
 
+import com.minis.utils.StringUtils;
+
 import java.util.Map;
 
 public class MapPropertySource extends PropertySource<Map<String, Object>>{
@@ -12,6 +14,11 @@ public class MapPropertySource extends PropertySource<Map<String, Object>>{
     @Override
     public Object getProperty(String name) {
         return this.source.get(name);
+    }
+
+    @Override
+    public String[] getPropertyNames() {
+        return StringUtils.toStringArray(this.source.keySet());
     }
 
 }

@@ -3,21 +3,30 @@ package com.minis.boot;
 import com.minis.beans.factory.support.AbstractAutowireCapableBeanFactory;
 import com.minis.beans.factory.support.BeanDefinitionRegistry;
 import com.minis.beans.factory.support.ConfigurableListableBeanFactory;
+import com.minis.boot.context.event.EventPublishingRunListener;
 import com.minis.context.ApplicationContext;
 import com.minis.context.support.AbstractApplicationContext;
+import com.minis.core.env.ConfigurableEnvironment;
 import com.minis.core.io.SpringFactoriesLoader;
 import com.minis.utils.ClassUtils;
 import com.minis.context.ConfigurableApplicationContext;
 import com.minis.utils.CollectionUtils;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
 
+@Slf4j
 public class SpringApplication {
 
     private final Set<Class<?>> primarySources;
     private List<ApplicationContextInitializer<?>> initializers;
 
     private Class<?> mainApplicationClass;
+
+    private ConfigurableEnvironment environment;
+
+    private Set<String> additionalProfiles = Collections.emptySet();
+
     private ApplicationContextFactory applicationContextFactory = ApplicationContextFactory.DEFAULT;
 
     final ApplicationProperties properties = new ApplicationProperties();
@@ -44,11 +53,23 @@ public class SpringApplication {
     }
 
     public ConfigurableApplicationContext run(String... args) {
-        ConfigurableApplicationContext context = null;
-        context = this.createApplicationContext();
-        prepareContext(context);
-        refreshContext(context);
+        ConfigurableApplicationContext context;
+        SpringApplicationRunListeners listeners = getRunListeners(args);
+        try {
+            ConfigurableEnvironment environment = prepareEnvironment(listeners);
+            context = this.createApplicationContext();
+            prepareContext(context, environment);
+            refreshContext(context);
+        } catch (Throwable ex) {
+            log.error("Unable to run application", ex);
+            throw ex;
+        }
         return context;
+    }
+
+    private SpringApplicationRunListeners getRunListeners(String[] args) {
+        //return new SpringApplicationRunListeners(this.getSpringFactoriesInstances(SpringApplicationRunListener.class));
+        return new SpringApplicationRunListeners(List.of(new EventPublishingRunListener(this)));
     }
 
     private void refreshContext(ConfigurableApplicationContext context) {
@@ -59,7 +80,8 @@ public class SpringApplication {
         applicationContext.refresh();
     }
 
-    private void prepareContext(ConfigurableApplicationContext context) {
+    private void prepareContext(ConfigurableApplicationContext context, ConfigurableEnvironment environment) {
+        context.setEnvironment(environment);
         ConfigurableListableBeanFactory beanFactory = context.getBeanFactory();
         if (beanFactory instanceof AbstractAutowireCapableBeanFactory autowireCapableBeanFactory) {
             autowireCapableBeanFactory.setAllowCircularReferences(this.properties.isAllowCircularReferences());
@@ -105,4 +127,25 @@ public class SpringApplication {
     private <T> List<T> getSpringFactoriesInstances(Class<T> type) {
         return SpringFactoriesLoader.forDefaultResourceLocation(getClassLoader()).load(type);
     }
+
+    private ConfigurableEnvironment prepareEnvironment(SpringApplicationRunListeners listeners) {
+        ConfigurableEnvironment environment = getOrCreateEnvironment();
+        listeners.environmentPrepared(environment);
+        return environment;
+    }
+
+    private ConfigurableEnvironment getOrCreateEnvironment() {
+        if (this.environment != null) {
+            return this.environment;
+        }
+        WebApplicationType webApplicationType = this.properties.getWebApplicationType();
+        ConfigurableEnvironment environment = this.applicationContextFactory.createEnvironment(webApplicationType);
+        return environment;
+    }
+
+    public Set<String> getAdditionalProfiles() {
+        return this.additionalProfiles;
+    }
+
+
 }

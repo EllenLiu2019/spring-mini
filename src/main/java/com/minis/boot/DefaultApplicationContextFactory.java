@@ -1,6 +1,7 @@
 package com.minis.boot;
 
 import com.minis.context.ConfigurableApplicationContext;
+import com.minis.core.env.ConfigurableEnvironment;
 import com.minis.core.io.SpringFactoriesLoader;
 
 import java.util.function.BiFunction;
@@ -32,6 +33,11 @@ public class DefaultApplicationContextFactory implements ApplicationContextFacto
             }
         }
         return (defaultResult != null) ? defaultResult.get() : null;
+    }
+
+    @Override
+    public ConfigurableEnvironment createEnvironment(WebApplicationType webApplicationType) {
+        return getFromSpringFactories(webApplicationType, ApplicationContextFactory::createEnvironment, null);
     }
 
 }

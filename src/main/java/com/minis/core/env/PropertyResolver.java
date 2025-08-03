@@ -1,7 +1,6 @@
 package com.minis.core.env;
 
 public interface PropertyResolver {
-    boolean containsProperty(String propertyName);
 
     String getProperty(String key);
 
@@ -11,11 +10,4 @@ public interface PropertyResolver {
 
     <T> T getProperty(String key, Class<T> targetType, T defaultValue);
 
-    <T> Class<T> getPropertyAsClass(String key, Class<T> targetType);
-
-    String getRequiredProperty(String key) throws IllegalStateException;
-
-    <T> T getRequiredProperty(String key, Class<T> targetType) throws IllegalStateException;
-    String resolvePlaceholders(String text);
-    String resolveRequiredPlaceholders(String text) throws IllegalStateException;
 }
