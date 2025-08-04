@@ -145,11 +145,6 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
     public abstract void finishRefresh();
 
     @Override
-    public void registerSingleton(String beanName, Object singletonObject) {
-        getBeanFactory().registerSingleton(beanName, singletonObject);
-    }
-
-    @Override
     public boolean containsBean(String name) {
         return getBeanFactory().containsBean(name);
     }
@@ -167,21 +162,6 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
     @Override
     public Class<?> getType(String name) {
         return getBeanFactory().getType(name);
-    }
-
-    @Override
-    public Object getSingleton(String beanName) {
-        return getBeanFactory().getSingleton(beanName);
-    }
-
-    @Override
-    public boolean containsSingleton(String beanName) {
-        return getBeanFactory().containsSingleton(beanName);
-    }
-
-    @Override
-    public String[] getSingletonNames() {
-        return getBeanFactory().getSingletonNames();
     }
 
     @Override
@@ -207,27 +187,6 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
     @Override
     public <T> Map<String, T> getBeansOfType(Class<T> type) throws BeansException, ReflectiveOperationException {
         return getBeanFactory().getBeansOfType(type);
-    }
-
-    @Override
-    public void addBeanPostProcessor(BeanPostProcessor beanPostProcessor) {
-        getBeanFactory().addBeanPostProcessor(beanPostProcessor);
-
-    }
-
-    @Override
-    public int getBeanPostProcessorCount() {
-        return getBeanFactory().getBeanPostProcessorCount();
-    }
-
-    @Override
-    public String[] getDependentBeans(String beanName) {
-        return getBeanFactory().getDependentBeans(beanName);
-    }
-
-    @Override
-    public String[] getDependenciesForBean(String beanName) {
-        return getBeanFactory().getDependenciesForBean(beanName);
     }
 
     @Override

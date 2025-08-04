@@ -10,3 +10,4 @@ com.minis.tx.transaction.TransactionManager
 com.minis.tx.interceptor.TransactionInterceptor
 com.minis.aop.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator
 com.minis.aop.springframework.aop.support.NameMatchMethodPointcutAdvisor
+com.minis.context.support.PropertySourcesPlaceholderConfigurer

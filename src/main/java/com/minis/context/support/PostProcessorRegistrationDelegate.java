@@ -15,21 +15,37 @@ final public class PostProcessorRegistrationDelegate {
 
     public static void invokeBeanFactoryPostProcessors(ConfigurableListableBeanFactory beanFactory) throws BeansException, ReflectiveOperationException {
 
+        Set<String> processedBeans = new HashSet<>();
         // Invoke BeanDefinitionRegistryPostProcessors first, if any.
         if (beanFactory instanceof BeanDefinitionRegistry registry) {
             // Do not initialize FactoryBeans here: We need to leave all regular beans
             // uninitialized to let the bean factory post-processors apply to them!
             List<BeanDefinitionRegistryPostProcessor> currentRegistryProcessors = new ArrayList<>();
-            List<BeanDefinitionRegistryPostProcessor> registryProcessors = new ArrayList<>();
+            List<BeanDefinitionRegistryPostProcessor> registryProcessors;
             String[] postProcessorNames = beanFactory.getBeanNamesForType(BeanDefinitionRegistryPostProcessor.class);
             for (String ppName : postProcessorNames) {
                 currentRegistryProcessors.add((BeanDefinitionRegistryPostProcessor) beanFactory.getBean(ppName));
+                processedBeans.add(ppName);
             }
             registryProcessors = new ArrayList<>(currentRegistryProcessors);
 
             invokeBeanDefinitionRegistryPostProcessors(currentRegistryProcessors, registry);
+            // invoke the postProcessBeanFactory callback of all registry handled so far.
             invokeBeanFactoryPostProcessors(registryProcessors, beanFactory);
         }
+
+        String[] postProcessorNames = beanFactory.getBeanNamesForType(BeanFactoryPostProcessor.class);
+
+        List<BeanFactoryPostProcessor> postProcessors = new ArrayList<>();
+        for (String ppName : postProcessorNames) {
+            if (processedBeans.contains(ppName)) {
+                // skip - already processed in first phase above
+            } else {
+                postProcessors.add((BeanFactoryPostProcessor) beanFactory.getBean(ppName));
+            }
+        }
+
+        invokeBeanFactoryPostProcessors(postProcessors, beanFactory);
 
     }
 
@@ -49,7 +65,7 @@ final public class PostProcessorRegistrationDelegate {
 
     public static void registerBeanPostProcessors(ConfigurableListableBeanFactory beanFactory) throws ReflectiveOperationException, BeansException {
         String[] postProcessorNames = beanFactory.getBeanNamesForType(BeanPostProcessor.class);
-        for(String postProcessorName : postProcessorNames) {
+        for (String postProcessorName : postProcessorNames) {
             beanFactory.addBeanPostProcessor((BeanPostProcessor) beanFactory.getBean(postProcessorName));
         }
     }

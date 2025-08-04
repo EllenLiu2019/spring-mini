@@ -17,10 +17,13 @@ public final class AttributeMethods {
 
     private final Method[] attributeMethods;
 
+    private final boolean[] canThrowTypeNotPresentException;
+
 
     private AttributeMethods(Class<? extends Annotation> annotationType, Method[] attributeMethods) {
         this.annotationType = annotationType;
         this.attributeMethods = attributeMethods;
+        this.canThrowTypeNotPresentException = new boolean[attributeMethods.length];
     }
 
     static AttributeMethods forAnnotationType(Class<? extends Annotation> annotationType) {
@@ -68,5 +71,28 @@ public final class AttributeMethods {
             }
         }
         return -1;
+    }
+
+    boolean canLoad(Annotation annotation) {
+        for (int i = 0; i < size(); i++) {
+            if (canThrowTypeNotPresentException(i)) {
+                try {
+                    AnnotationUtils.invokeAnnotationMethod(get(i), annotation);
+                }
+                catch (IllegalStateException ex) {
+                    // Plain invocation failure to expose -> leave up to attribute retrieval
+                    // (if any) where such invocation failure will be logged eventually.
+                }
+                catch (Throwable ex) {
+                    // TypeNotPresentException etc. -> annotation type not actually loadable.
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    boolean canThrowTypeNotPresentException(int index) {
+        return this.canThrowTypeNotPresentException[index];
     }
 }

@@ -3,6 +3,8 @@ package com.minis.core.annotation;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Member;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.Predicate;
 
@@ -20,6 +22,8 @@ public class TypeMappedAnnotations implements MergedAnnotations {
 
     private final Annotation[] annotations;
 
+    private SearchStrategy searchStrategy;
+
 
     public TypeMappedAnnotations(AnnotatedElement element) {
         this.source = element;
@@ -31,6 +35,20 @@ public class TypeMappedAnnotations implements MergedAnnotations {
         this.source = source;
         this.element = null;
         this.annotations = annotations;
+    }
+
+    private TypeMappedAnnotations(AnnotatedElement element, SearchStrategy searchStrategy) {
+        this.source = element;
+        this.element = element;
+        this.searchStrategy = searchStrategy;
+        this.annotations = null;
+    }
+
+    static MergedAnnotations from(AnnotatedElement element, SearchStrategy searchStrategy) {
+        if (AnnotationsScanner.isKnownEmpty(element, searchStrategy)) {
+            return NONE;
+        }
+        return new TypeMappedAnnotations(element, searchStrategy);
     }
 
     @Override
@@ -46,6 +64,11 @@ public class TypeMappedAnnotations implements MergedAnnotations {
             }
         }
         return null;
+    }
+
+    @Override
+    public <A extends Annotation> MergedAnnotation<A> get(Class<A> annotationType) {
+        return getAggregates(annotationType);
     }
 
     public List<AnnotationTypeMappings> getAggregates() {

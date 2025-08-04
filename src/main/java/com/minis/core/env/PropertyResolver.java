@@ -10,4 +10,5 @@ public interface PropertyResolver {
 
     <T> T getProperty(String key, Class<T> targetType, T defaultValue);
 
+    String resolveRequiredPlaceholders(String text) throws IllegalArgumentException;
 }

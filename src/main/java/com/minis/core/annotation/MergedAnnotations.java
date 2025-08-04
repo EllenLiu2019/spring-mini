@@ -23,4 +23,18 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
         return MergedAnnotationsCollection.of(annotations);
     }
 
+    static MergedAnnotations from(AnnotatedElement element) {
+        return from(element, SearchStrategy.DIRECT);
+    }
+
+    static MergedAnnotations from(AnnotatedElement element, SearchStrategy searchStrategy) {
+        return TypeMappedAnnotations.from(element, searchStrategy);
+    }
+
+    <A extends Annotation> MergedAnnotation<A> get(Class<A> annotationType);
+
+    enum SearchStrategy {
+        DIRECT,
+        INHERITED_ANNOTATIONS,
+    }
 }

@@ -106,4 +106,8 @@ final class MergedAnnotationsCollection implements MergedAnnotations {
         return null;
     }
 
+    @Override
+    public <A extends Annotation> MergedAnnotation<A> get(Class<A> annotationType) {
+        return null;
+    }
 }

@@ -6,7 +6,6 @@ import com.minis.beans.BeansException;
 import com.minis.beans.factory.BeanFactory;
 import com.minis.beans.factory.BeanFactoryAware;
 import com.minis.beans.factory.config.BeanPostProcessor;
-import com.minis.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import com.minis.utils.PatternMatchUtils;
 import lombok.Setter;
 

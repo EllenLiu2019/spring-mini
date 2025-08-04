@@ -73,7 +73,15 @@ public class TypeMappedAnnotation<A extends Annotation> implements MergedAnnotat
 
     @SuppressWarnings("unchecked")
     private <T> T getValue(Method attribute) {
-        Object value = AnnotationUtils.invokeAnnotationMethod(attribute, this.mapping.getAnnotation());
+        Object value = null;
+        if (this.mapping.getDistance() == 0 && this.mapping.getAnnotation() == null) {
+            if (this.source instanceof AnnotatedElementUtils.AnnotatedElementForAnnotations aeSource) {
+                Annotation annotation = aeSource.getAnnotations()[0];
+                value = AnnotationUtils.invokeAnnotationMethod(attribute, annotation);
+            }
+        } else {
+            value = AnnotationUtils.invokeAnnotationMethod(attribute, this.mapping.getAnnotation());
+        }
         if (value == null) {
             value = attribute.getDefaultValue();
         }

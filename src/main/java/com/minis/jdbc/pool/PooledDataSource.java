@@ -1,5 +1,6 @@
 package com.minis.jdbc.pool;
 
+import com.minis.beans.factory.annotation.Value;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -18,15 +19,16 @@ import java.util.logging.Logger;
 
 @Slf4j
 public class PooledDataSource implements DataSource {
-    @Setter
-    private String driverClassName;
-    @Setter
-    @Getter
-    private String url = "jdbc:mysql://localhost:3306/spring-mini";
-    @Setter
-    private String username = "deepblue";
-    @Setter
-    private String password = "deepblue123456";
+
+    @Value("${datasource.spring-mini.jdbc-url}")
+    private String url;
+
+    @Value("${datasource.spring-mini.username}")
+    private String username;
+
+    @Value("${datasource.spring-mini.password}")
+    private String password;
+
     @Getter
     private Properties connectionProperties;
     private List<PooledConnection> connections;

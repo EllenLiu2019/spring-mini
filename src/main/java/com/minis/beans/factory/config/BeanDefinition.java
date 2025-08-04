@@ -50,6 +50,9 @@ public class BeanDefinition {
 
     private Resource resource;
 
+    public final Object postProcessingLock = new Object();
+    public boolean postProcessed = false;
+
     public BeanDefinition(String id, String className) {
         this.id = id;
         this.className = className;
@@ -199,5 +202,11 @@ public class BeanDefinition {
 
     public Resource getResource() {
         return this.resource;
+    }
+
+    public void markAsPostProcessed() {
+        synchronized (this.postProcessingLock) {
+            this.postProcessed = true;
+        }
     }
 }

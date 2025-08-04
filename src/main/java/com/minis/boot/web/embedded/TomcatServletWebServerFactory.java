@@ -1,5 +1,6 @@
 package com.minis.boot.web.embedded;
 
+import com.minis.beans.factory.annotation.Value;
 import com.minis.boot.web.servlet.ServletContextInitializer;
 import com.minis.boot.web.servlet.server.ServletWebServerFactory;
 import com.minis.boot.web.servlet.server.WebServer;
@@ -22,7 +23,8 @@ public class TomcatServletWebServerFactory implements ServletWebServerFactory {
 
     public static final String DEFAULT_PROTOCOL = "org.apache.coyote.http11.Http11NioProtocol";
 
-    private int port = 8080;
+    @Value("${server.port}")
+    private int port;
 
     private String protocol = DEFAULT_PROTOCOL;
 

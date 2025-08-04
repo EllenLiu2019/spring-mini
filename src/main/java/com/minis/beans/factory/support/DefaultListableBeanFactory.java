@@ -2,15 +2,17 @@ package com.minis.beans.factory.support;
 
 import com.minis.beans.BeansException;
 import com.minis.beans.factory.annotation.AnnotatedBeanDefinition;
+import com.minis.beans.factory.annotation.Value;
 import com.minis.beans.factory.config.BeanDefinition;
+import com.minis.beans.factory.config.DependencyDescriptor;
+import com.minis.core.annotation.AnnotatedElementUtils;
+import com.minis.core.annotation.AnnotationAttributes;
 import com.minis.core.type.MethodMetadata;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.lang.annotation.Annotation;
+import java.util.*;
 
 public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFactory
         implements ConfigurableListableBeanFactory {
@@ -104,5 +106,50 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
         } catch (ReflectiveOperationException | BeansException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public Object resolveDependency(DependencyDescriptor descriptor, String requestingBeanName,
+                                    Set<String> autowiredBeanNames) throws BeansException {
+
+        return doResolveDependency(descriptor);
+    }
+
+    public Object doResolveDependency(DependencyDescriptor descriptor) throws BeansException {
+        try {
+            Class<?> type = descriptor.getDependencyType();
+            Object value = this.findValue(descriptor.getAnnotations());
+            if (value != null) {
+                String resolvedValue = null;
+                if (value instanceof String strValue) {
+                    resolvedValue = resolveEmbeddedValue(strValue);
+                }
+                if (int.class.isAssignableFrom(type)) {
+                    return Integer.parseInt(resolvedValue);
+                }
+                return resolvedValue;
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return null;
+    }
+
+    protected Object findValue(Annotation[] annotationsToSearch) {
+        if (annotationsToSearch.length > 0) {   // qualifier annotations have to be local
+            AnnotationAttributes attr = AnnotatedElementUtils.getMergedAnnotationAttributes(
+                    AnnotatedElementUtils.forAnnotations(annotationsToSearch), Value.class);
+            if (attr != null) {
+                return extractValue(attr);
+            }
+        }
+        return null;
+    }
+
+    protected Object extractValue(AnnotationAttributes attr) {
+        Object value = attr.get("value");
+        if (value == null) {
+            throw new IllegalStateException("Value annotation must have a value attribute");
+        }
+        return value;
     }
 }
