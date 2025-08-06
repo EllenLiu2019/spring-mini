@@ -1,6 +1,8 @@
-package com.minis.beans;
+package com.minis.beans.propertyeditors;
 
-public class StringEditor implements PropertyEditor {
+import java.beans.PropertyEditorSupport;
+
+public class StringEditor extends PropertyEditorSupport {
     private Class<String> strClass;
     private String strFormat;
     private boolean allowEmpty;

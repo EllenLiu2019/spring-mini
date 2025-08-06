@@ -1,9 +1,8 @@
 package com.minis.context.support;
 
 import com.minis.beans.BeansException;
-import com.minis.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
+import com.minis.beans.ResourceEditorRegistrar;
 import com.minis.beans.factory.config.BeanFactoryPostProcessor;
-import com.minis.beans.factory.config.BeanPostProcessor;
 import com.minis.beans.factory.support.ConfigurableListableBeanFactory;
 import com.minis.context.ApplicationEventPublisher;
 import com.minis.context.ConfigurableApplicationContext;
@@ -100,6 +99,7 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
     }
 
     protected void prepareBeanFactory(ConfigurableListableBeanFactory beanFactory) {
+        beanFactory.addPropertyEditorRegistrar(new ResourceEditorRegistrar(getEnvironment()));
         beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
         beanFactory.addBeanPostProcessor(new AsyncAnnotationBeanPostProcessor());
     }

@@ -1,8 +1,6 @@
 package com.minis.beans.factory.support;
 
-import com.minis.beans.BeansException;
-import com.minis.beans.PropertyValue;
-import com.minis.beans.PropertyValues;
+import com.minis.beans.*;
 import com.minis.beans.factory.BeanFactoryAware;
 import com.minis.beans.factory.config.*;
 import com.minis.utils.ClassUtils;
@@ -102,6 +100,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
     }
 
     private Object instantiateUsingFactoryMethod(String beanClassName, BeanDefinition bd) {
+        BeanWrapperImpl bw = new BeanWrapperImpl();
+        this.initBeanWrapper(bw);
+
         List<Method> candidates = new ArrayList<>();
         String factoryBeanName = bd.getFactoryBeanName();
         try {
@@ -321,7 +322,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
     @Override
     public Object createBeanInstance(String beanName, Class<?> clazz, BeanDefinition bd) throws ReflectiveOperationException {
         try {
-            return clazz.getConstructor().newInstance();
+            Object beanInstance = clazz.getConstructor().newInstance();
+            BeanWrapper bw = new BeanWrapperImpl(beanInstance);
+            initBeanWrapper(bw);
+            return beanInstance;
         } catch (NoSuchMethodException e) {
             log.info("no default constructor, autowired try");
             return autowireConstructor(clazz);
@@ -329,6 +333,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
     }
 
     private Object autowireConstructor(Class<?> clazz) throws ReflectiveOperationException {
+
+        BeanWrapperImpl bw = new BeanWrapperImpl();
+        this.initBeanWrapper(bw);
+
         Object instance;
         Constructor<?>[] ctors = clazz.getDeclaredConstructors();
         for (Constructor<?> ctor : ctors) {

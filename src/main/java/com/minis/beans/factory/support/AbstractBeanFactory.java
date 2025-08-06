@@ -1,23 +1,11 @@
 package com.minis.beans.factory.support;
 
-import com.minis.beans.BeansException;
-import com.minis.beans.PropertyValue;
-import com.minis.beans.PropertyValues;
+import com.minis.beans.*;
 import com.minis.beans.factory.FactoryBean;
 import com.minis.beans.factory.config.*;
-import com.minis.utils.ReflectionUtils;
 import com.minis.utils.StringValueResolver;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -27,6 +15,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
     private final Map<String, Object> earlySingletonObjects = new HashMap<>(16);
 
     private final List<StringValueResolver> embeddedValueResolvers = new CopyOnWriteArrayList<>();
+
+    private final Set<PropertyEditorRegistrar> defaultEditorRegistrars = new LinkedHashSet<>(4);
 
     @Override
     public Object getBean(String beanName) throws BeansException, ReflectiveOperationException {
@@ -116,6 +106,44 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
         return result;
     }
 
+    @Override
+    public void addPropertyEditorRegistrar(PropertyEditorRegistrar registrar) {
+        this.defaultEditorRegistrars.add(registrar);
+    }
+
+    protected void initBeanWrapper(BeanWrapper bw) {
+        registerCustomEditors(bw);
+    }
+
+    /**
+     * Optional, add a registrar {@link BeanFactoryDefaultEditorRegistrar}, which used to register additional default Property Editors
+     * the only implementation is in {@link PropertyEditorRegistrySupport}
+     * BeanWrapperImpl implements {@link PropertyEditorRegistrySupport}, and can register additional default Property Editors,
+     * Each BeanWrapperImpl has typeConverterDelegate which include the beanWrapperImpl itself,
+     * this reference is named propertyEditorRegistry and will invoke getDefaultEditor method
+     * @param registry -> beanWrapperImpl & SimpletypeConverter
+     */
+    protected void registerCustomEditors(PropertyEditorRegistry registry) {
+        if (registry instanceof PropertyEditorRegistrySupport registrySupport) {
+            if (!this.defaultEditorRegistrars.isEmpty()) {
+                // Optimization: lazy overriding of default editors only when needed
+                registrySupport.setDefaultEditorRegistrar(new BeanFactoryDefaultEditorRegistrar());
+            }
+        }
+    }
+
+    /**
+     * Process this.defaultEditorRegistrars:
+     *   add some specified editors into property -> overriddenDefaultEditors
+     * @param registry {@link PropertyEditorRegistrySupport}
+     * @param registrars {@link ResourceEditorRegistrar}
+     */
+    private void applyEditorRegistrars(PropertyEditorRegistry registry, Set<PropertyEditorRegistrar> registrars) {
+        for (PropertyEditorRegistrar registrar : registrars) {
+            registrar.registerCustomEditors(registry);
+        }
+    }
+
     public abstract BeanDefinition getBeanDefinition(String name) throws BeansException;
 
     @Override
@@ -126,5 +154,13 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
     protected abstract Object doGetBean(String beanName) throws ReflectiveOperationException, BeansException;
 
     abstract Object createBeanInstance(String beanName, Class<?> clz, BeanDefinition bd) throws ReflectiveOperationException;
+
+    class BeanFactoryDefaultEditorRegistrar implements PropertyEditorRegistrar {
+
+        @Override
+        public void registerCustomEditors(PropertyEditorRegistry registry) {
+            applyEditorRegistrars(registry, defaultEditorRegistrars);
+        }
+    }
 
 }

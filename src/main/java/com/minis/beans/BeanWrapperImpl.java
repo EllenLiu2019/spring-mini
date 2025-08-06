@@ -1,7 +1,7 @@
 package com.minis.beans;
 
-import com.minis.beans.*;
 
+import java.beans.PropertyEditor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -12,12 +12,11 @@ import java.util.List;
 // BeanWrapper 同时也是源属性访问器 和 属性编辑器注册中心
 // BeanWrapper 中封装目的属性信息
 // 这个类的作用就是根据 不同的类型属性的特性，对属性值进行类型转换、赋值
-public class BeanWrapperImpl extends PropertyEditorRegistrySupport {
+public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements BeanWrapper {
     List<Object> wrappedObject;
     List<Class<?>> clz = new ArrayList<>();
 
     public BeanWrapperImpl(List<Object> object) {
-        super();
         this.wrappedObject = object;
         initClz();
     }

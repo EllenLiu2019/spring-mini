@@ -1,5 +1,6 @@
 package com.minis.beans.factory.support;
 
+import com.minis.beans.PropertyEditorRegistrar;
 import com.minis.beans.factory.BeanFactory;
 import com.minis.beans.factory.config.BeanPostProcessor;
 import com.minis.beans.factory.config.SingletonBeanRegistry;
@@ -16,4 +17,6 @@ public interface ConfigurableBeanFactory extends BeanFactory, SingletonBeanRegis
     void addEmbeddedValueResolver(StringValueResolver valueResolver);
 
     String resolveEmbeddedValue(String value);
+
+    void addPropertyEditorRegistrar(PropertyEditorRegistrar registrar);
 }

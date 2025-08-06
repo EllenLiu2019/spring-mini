@@ -1,11 +1,12 @@
-package com.minis.beans;
+package com.minis.beans.propertyeditors;
 
 import com.minis.utils.NumberUtils;
 import com.minis.utils.StringUtils;
 
+import java.beans.PropertyEditorSupport;
 import java.text.NumberFormat;
 
-public class CustomNumberEditor implements PropertyEditor {
+public class CustomNumberEditor extends PropertyEditorSupport {
     private Object value;
     private Class<? extends Number> numberClass; //数据类型
     private NumberFormat numberFormat; //指定格式
@@ -50,7 +51,7 @@ public class CustomNumberEditor implements PropertyEditor {
     }
 
     @Override
-    public Object getAsText() {
+    public String getAsText() {
         Object value = this.value;
         if (value == null) {
             return "";

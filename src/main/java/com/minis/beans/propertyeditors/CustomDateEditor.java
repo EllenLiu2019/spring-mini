@@ -1,14 +1,14 @@
-package com.minis.test.mvc;
+package com.minis.beans.propertyeditors;
 
-import com.minis.beans.PropertyEditor;
 import com.minis.utils.StringUtils;
 
+import java.beans.PropertyEditorSupport;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
-public class CustomDateEditor implements PropertyEditor {
+public class CustomDateEditor extends PropertyEditorSupport {
     private DateTimeFormatter datetimeFormatter;
     private boolean allowEmpty;
     private Date value;

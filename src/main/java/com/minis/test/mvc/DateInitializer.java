@@ -1,5 +1,6 @@
 package com.minis.test.mvc;
 
+import com.minis.beans.propertyeditors.CustomDateEditor;
 import com.minis.web.bind.support.WebBindingInitializer;
 import com.minis.web.bind.WebDataBinder;
 
