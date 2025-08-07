@@ -1,6 +1,7 @@
 package com.minis.beans.factory.support;
 
 import com.minis.beans.BeansException;
+import com.minis.beans.TypeConverter;
 import com.minis.beans.factory.annotation.AnnotatedBeanDefinition;
 import com.minis.beans.factory.annotation.Value;
 import com.minis.beans.factory.config.BeanDefinition;
@@ -123,10 +124,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
                 if (value instanceof String strValue) {
                     resolvedValue = resolveEmbeddedValue(strValue);
                 }
-                if (int.class.isAssignableFrom(type)) {
-                    return Integer.parseInt(resolvedValue);
-                }
-                return resolvedValue;
+                TypeConverter converter = getTypeConverter();
+                return converter.convertIfNecessary(resolvedValue, type, descriptor.getTypeDescriptor());
             }
         } catch (Exception e) {
             throw new RuntimeException(e);

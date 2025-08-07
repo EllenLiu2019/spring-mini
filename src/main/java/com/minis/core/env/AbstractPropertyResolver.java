@@ -1,5 +1,7 @@
 package com.minis.core.env;
 
+import com.minis.core.convert.support.ConfigurableConversionService;
+import com.minis.core.convert.support.DefaultConversionService;
 import com.minis.utils.ClassUtils;
 import com.minis.utils.PropertyPlaceholderHelper;
 import com.minis.utils.SystemPropertyUtils;
@@ -16,6 +18,8 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
     private Character escapeCharacter = SystemPropertyUtils.ESCAPE_CHARACTER;
 
     private PropertyPlaceholderHelper strictHelper;
+
+    private volatile ConfigurableConversionService conversionService;
 
 
     @Override
@@ -70,4 +74,26 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
     }
 
     protected abstract String getPropertyAsRawString(String key);
+
+    @Override
+    public ConfigurableConversionService getConversionService() {
+        // Need to provide an independent DefaultConversionService, not the
+        // shared DefaultConversionService used by PropertySourcesPropertyResolver.
+        ConfigurableConversionService cs = this.conversionService;
+        if (cs == null) {
+            synchronized (this) {
+                cs = this.conversionService;
+                if (cs == null) {
+                    cs = new DefaultConversionService();
+                    this.conversionService = cs;
+                }
+            }
+        }
+        return cs;
+    }
+
+    @Override
+    public void setConversionService(ConfigurableConversionService conversionService) {
+        this.conversionService = conversionService;
+    }
 }

@@ -352,6 +352,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
             } catch (ReflectiveOperationException | BeansException e) {
                 throw new RuntimeException(e);
             }
+
+            bw.setBeanInstance(instance);
             return instance;
         }
         throw new ReflectiveOperationException("No matching constructor found for bean '" + clazz + "'");

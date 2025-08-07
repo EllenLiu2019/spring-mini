@@ -6,6 +6,7 @@ import com.minis.beans.factory.support.ConfigurableListableBeanFactory;
 import com.minis.boot.context.event.EventPublishingRunListener;
 import com.minis.context.ApplicationContext;
 import com.minis.context.support.AbstractApplicationContext;
+import com.minis.core.convert.support.DefaultConversionService;
 import com.minis.core.env.ConfigurableEnvironment;
 import com.minis.core.io.SpringFactoriesLoader;
 import com.minis.utils.ClassUtils;
@@ -82,12 +83,17 @@ public class SpringApplication {
 
     private void prepareContext(ConfigurableApplicationContext context, ConfigurableEnvironment environment) {
         context.setEnvironment(environment);
+        postProcessApplicationContext(context);
         ConfigurableListableBeanFactory beanFactory = context.getBeanFactory();
         if (beanFactory instanceof AbstractAutowireCapableBeanFactory autowireCapableBeanFactory) {
             autowireCapableBeanFactory.setAllowCircularReferences(this.properties.isAllowCircularReferences());
         }
         Set<Object> sources = getAllSources();
         this.load(context, sources.toArray(new Object[0]));
+    }
+
+    protected void postProcessApplicationContext(ConfigurableApplicationContext context) {
+        context.getBeanFactory().setConversionService(context.getEnvironment().getConversionService());
     }
 
     protected void load(ApplicationContext context, Object[] sources) {
@@ -129,7 +135,8 @@ public class SpringApplication {
     }
 
     private ConfigurableEnvironment prepareEnvironment(SpringApplicationRunListeners listeners) {
-        ConfigurableEnvironment environment = getOrCreateEnvironment();
+        ConfigurableEnvironment environment = this.getOrCreateEnvironment();
+        environment.setConversionService(new DefaultConversionService());
         listeners.environmentPrepared(environment);
         return environment;
     }

@@ -1,16 +1,18 @@
 package com.minis.core.env;
 
+import com.minis.core.convert.support.ConfigurableConversionService;
+
 import java.util.Map;
 
 public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 
     private final MutablePropertySources propertySources;
 
-    private PropertyResolver propertyResolver;
+    private ConfigurablePropertyResolver propertyResolver;
 
     protected AbstractEnvironment(MutablePropertySources propertySources) {
         this.propertySources = propertySources;
-        //this.propertyResolver = createPropertyResolver(propertySources);
+        this.propertyResolver = createPropertyResolver(propertySources);
         customizePropertySources(propertySources);
     }
 
@@ -18,9 +20,9 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
         this(new MutablePropertySources());
     }
 
-    /*protected ConfigurablePropertyResolver createPropertyResolver(MutablePropertySources propertySources) {
+    protected ConfigurablePropertyResolver createPropertyResolver(MutablePropertySources propertySources) {
         return new PropertySourcesPropertyResolver(propertySources);
-    }*/
+    }
 
     protected void customizePropertySources(MutablePropertySources propertySources) {
     }
@@ -69,5 +71,19 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
     @Override
     public String resolveRequiredPlaceholders(String text) throws IllegalArgumentException {
         return this.propertyResolver.resolveRequiredPlaceholders(text);
+    }
+
+    //---------------------------------------------------------------------
+    // Implementation of ConfigurablePropertyResolver interface
+    //---------------------------------------------------------------------
+
+    @Override
+    public ConfigurableConversionService getConversionService() {
+        return this.propertyResolver.getConversionService();
+    }
+
+    @Override
+    public void setConversionService(ConfigurableConversionService conversionService) {
+        this.propertyResolver.setConversionService(conversionService);
     }
 }

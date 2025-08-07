@@ -6,6 +6,7 @@ import com.minis.beans.factory.config.BeanFactoryPostProcessor;
 import com.minis.beans.factory.support.ConfigurableListableBeanFactory;
 import com.minis.context.ApplicationEventPublisher;
 import com.minis.context.ConfigurableApplicationContext;
+import com.minis.core.env.ConfigurableEnvironment;
 import com.minis.core.env.Environment;
 import com.minis.scheduling.annotation.AsyncAnnotationBeanPostProcessor;
 
@@ -15,7 +16,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class AbstractApplicationContext implements ConfigurableApplicationContext {
-    private Environment environment;
+    private ConfigurableEnvironment environment;
     private final List<BeanFactoryPostProcessor> beanFactoryPostProcessors = new ArrayList<>();
     private long startupDate;
     private final AtomicBoolean active = new AtomicBoolean();
@@ -23,12 +24,12 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
     private ApplicationEventPublisher applicationEventPublisher;
 
     @Override
-    public void setEnvironment(Environment environment) {
+    public void setEnvironment(ConfigurableEnvironment environment) {
         this.environment = environment;
     }
 
     @Override
-    public Environment getEnvironment() {
+    public ConfigurableEnvironment getEnvironment() {
         return this.environment;
     }
 

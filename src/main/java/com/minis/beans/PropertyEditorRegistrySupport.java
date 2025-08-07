@@ -2,16 +2,19 @@ package com.minis.beans;
 
 import com.minis.beans.propertyeditors.CustomNumberEditor;
 import com.minis.beans.propertyeditors.StringEditor;
+import com.minis.core.convert.ConversionService;
 
 import java.beans.PropertyEditor;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
+
+    private ConversionService conversionService;
+
     private Map<Class<?>, PropertyEditor> defaultEditors;
+
     private Map<Class<?>, PropertyEditor> customEditors;
 
     private PropertyEditorRegistrar defaultEditorRegistrar;
@@ -64,6 +67,14 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
         this.defaultEditorRegistrar = registrar;
     }
 
+    public ConversionService getConversionService() {
+        return this.conversionService;
+    }
+
+    public void setConversionService(ConversionService conversionService) {
+        this.conversionService = conversionService;
+    }
+
     public PropertyEditor getDefaultEditor(Class<?> requiredType) {
         // Add Customized Editors by BeanFactoryDefaultEditorRegistrar in AbstractBeanFactory
         if (this.overriddenDefaultEditors == null && this.defaultEditorRegistrar != null) {
@@ -89,4 +100,11 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
         // Check directly registered editor for type.
         return this.customEditors.get(requiredType);
     }
+
+    @Override
+    public PropertyEditor findCustomEditor(Class<?> requiredType, String propertyPath) {
+        Class<?> requiredTypeToUse = requiredType;
+        return getCustomEditor(requiredTypeToUse);
+    }
+
 }

@@ -1,5 +1,5 @@
 package com.minis.core.env;
 
-public interface Environment extends PropertyResolver {
+public interface Environment extends ConfigurablePropertyResolver {
 
 }

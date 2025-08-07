@@ -1,6 +1,8 @@
 package com.minis.beans.factory.config;
 
 import com.minis.beans.factory.InjectionPoint;
+import com.minis.core.ResolvableType;
+import com.minis.core.convert.TypeDescriptor;
 
 import java.lang.reflect.Field;
 
@@ -10,22 +12,18 @@ public class DependencyDescriptor extends InjectionPoint {
 
     private String fieldName;
 
-    private final boolean required;
-
-    private final boolean eager;
+    private final boolean required = true;
 
     private Class<?> containingClass;
 
-    public DependencyDescriptor(Field field) {
-        this(field, true, true);
-    }
+    private transient volatile TypeDescriptor typeDescriptor;
 
-    public DependencyDescriptor(Field field, boolean required, boolean eager) {
+    private transient volatile ResolvableType resolvableType;
+
+    public DependencyDescriptor(Field field) {
         super(field);
         this.declaringClass = field.getDeclaringClass();
         this.fieldName = field.getName();
-        this.required = required;
-        this.eager = eager;
     }
 
     public void setContainingClass(Class<?> containingClass) {
@@ -34,5 +32,23 @@ public class DependencyDescriptor extends InjectionPoint {
 
     public Class<?> getDependencyType() {
         return this.field.getType();
+    }
+
+    public TypeDescriptor getTypeDescriptor() {
+        TypeDescriptor typeDescriptor = this.typeDescriptor;
+        if (typeDescriptor == null) {
+            typeDescriptor = new TypeDescriptor(getResolvableType(), getDependencyType());
+            this.typeDescriptor = typeDescriptor;
+        }
+        return typeDescriptor;
+    }
+
+    public ResolvableType getResolvableType() {
+        ResolvableType resolvableType = this.resolvableType;
+        if (resolvableType == null) {
+            resolvableType = ResolvableType.forField(this.field, this.containingClass);
+            this.resolvableType = resolvableType;
+        }
+        return resolvableType;
     }
 }

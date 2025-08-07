@@ -1,0 +1,7 @@
+package com.minis.core.convert.converter;
+
+@FunctionalInterface
+public interface Converter<S,T> {
+
+    T convert(S source);
+}

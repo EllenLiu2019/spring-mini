@@ -3,6 +3,7 @@ package com.minis.beans.factory.support;
 import com.minis.beans.*;
 import com.minis.beans.factory.FactoryBean;
 import com.minis.beans.factory.config.*;
+import com.minis.core.convert.ConversionService;
 import com.minis.utils.StringValueResolver;
 
 import java.util.*;
@@ -17,6 +18,10 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
     private final List<StringValueResolver> embeddedValueResolvers = new CopyOnWriteArrayList<>();
 
     private final Set<PropertyEditorRegistrar> defaultEditorRegistrars = new LinkedHashSet<>(4);
+
+    private TypeConverter typeConverter;
+
+    private ConversionService conversionService;
 
     @Override
     public Object getBean(String beanName) throws BeansException, ReflectiveOperationException {
@@ -112,16 +117,16 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
     }
 
     protected void initBeanWrapper(BeanWrapper bw) {
-        registerCustomEditors(bw);
+        this.registerCustomEditors(bw);
     }
 
     /**
      * Optional, add a registrar {@link BeanFactoryDefaultEditorRegistrar}, which used to register additional default Property Editors
      * the only implementation is in {@link PropertyEditorRegistrySupport}
-     * BeanWrapperImpl implements {@link PropertyEditorRegistrySupport}, and can register additional default Property Editors,
+     * BeanWrapperImpl can register additional default Property Editors
      * Each BeanWrapperImpl has typeConverterDelegate which include the beanWrapperImpl itself,
      * this reference is named propertyEditorRegistry and will invoke getDefaultEditor method
-     * @param registry -> beanWrapperImpl & SimpletypeConverter
+     * @param registry -> beanWrapperImpl & SimpletypeConverter extend {@link PropertyEditorRegistrySupport}
      */
     protected void registerCustomEditors(PropertyEditorRegistry registry) {
         if (registry instanceof PropertyEditorRegistrySupport registrySupport) {
@@ -134,14 +139,43 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
     /**
      * Process this.defaultEditorRegistrars:
-     *   add some specified editors into property -> overriddenDefaultEditors
-     * @param registry {@link PropertyEditorRegistrySupport}
+     * add some specified editors into property -> overriddenDefaultEditors
+     *
+     * @param registry   {@link PropertyEditorRegistrySupport}
      * @param registrars {@link ResourceEditorRegistrar}
      */
     private void applyEditorRegistrars(PropertyEditorRegistry registry, Set<PropertyEditorRegistrar> registrars) {
         for (PropertyEditorRegistrar registrar : registrars) {
             registrar.registerCustomEditors(registry);
         }
+    }
+
+    @Override
+    public TypeConverter getTypeConverter() {
+        TypeConverter customConverter = getCustomTypeConverter();
+        if (customConverter != null) {
+            return customConverter;
+        } else {
+            // Build default TypeConverter, registering custom editors.
+            SimpleTypeConverter typeConverter = new SimpleTypeConverter();
+            typeConverter.setConversionService(getConversionService());
+            this.registerCustomEditors(typeConverter);
+            return typeConverter;
+        }
+    }
+
+    protected TypeConverter getCustomTypeConverter() {
+        return this.typeConverter;
+    }
+
+    @Override
+    public ConversionService getConversionService() {
+        return this.conversionService;
+    }
+
+    @Override
+    public void setConversionService(ConversionService conversionService) {
+        this.conversionService = conversionService;
     }
 
     public abstract BeanDefinition getBeanDefinition(String name) throws BeansException;

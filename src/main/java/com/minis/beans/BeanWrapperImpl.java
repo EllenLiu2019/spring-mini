@@ -12,8 +12,11 @@ import java.util.List;
 // BeanWrapper 同时也是源属性访问器 和 属性编辑器注册中心
 // BeanWrapper 中封装目的属性信息
 // 这个类的作用就是根据 不同的类型属性的特性，对属性值进行类型转换、赋值
-public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements BeanWrapper {
+public class BeanWrapperImpl extends TypeConverterSupport implements BeanWrapper {
     List<Object> wrappedObject;
+
+    Object rootObject;
+
     List<Class<?>> clz = new ArrayList<>();
 
     public BeanWrapperImpl(List<Object> object) {
@@ -21,6 +24,20 @@ public class BeanWrapperImpl extends PropertyEditorRegistrySupport implements Be
         initClz();
     }
 
+    public BeanWrapperImpl(Object object) {
+        this.wrappedObject = List.of(object);
+        this.typeConverterDelegate = new TypeConverterDelegate(this, object);
+    }
+
+    public BeanWrapperImpl() {
+        this.typeConverterDelegate = new TypeConverterDelegate(this);
+    }
+
+    public void setBeanInstance(Object object) {
+        this.wrappedObject = List.of(object);
+        this.rootObject = object;
+        this.typeConverterDelegate = new TypeConverterDelegate(this, this.wrappedObject);
+    }
     private void initClz() {
         for (Object obj : wrappedObject) {
             this.clz.add(obj.getClass());
