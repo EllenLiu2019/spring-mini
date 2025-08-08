@@ -1,4 +1,4 @@
-package com.minis.test.mvc;
+package com.minis.app.converter;
 
 import com.minis.beans.propertyeditors.CustomDateEditor;
 import com.minis.web.bind.support.WebBindingInitializer;
@@ -8,7 +8,7 @@ import java.util.Date;
 
 public class DateInitializer implements WebBindingInitializer {
     @Override
-    public void registerBinder(WebDataBinder binder) {
+    public void initBinder(WebDataBinder binder) {
         binder.registerCustomEditor(Date.class, new CustomDateEditor("yyyy-MM-dd", false));
     }
 }

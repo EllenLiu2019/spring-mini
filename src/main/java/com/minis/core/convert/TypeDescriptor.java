@@ -1,5 +1,6 @@
 package com.minis.core.convert;
 
+import com.minis.core.MethodParameter;
 import com.minis.core.ResolvableType;
 import com.minis.utils.ClassUtils;
 
@@ -29,6 +30,11 @@ public class TypeDescriptor implements Serializable {
     public TypeDescriptor(ResolvableType resolvableType, Class<?> type) {
         this.resolvableType = resolvableType;
         this.type = (type != null ? type : resolvableType.toClass());
+    }
+
+    public TypeDescriptor(MethodParameter methodParameter) {
+        this.resolvableType = ResolvableType.forMethodParameter(methodParameter);
+        this.type = this.resolvableType.resolve(methodParameter.getParameterType());
     }
 
     public static TypeDescriptor forObject(Object source) {

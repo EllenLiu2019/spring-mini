@@ -1,10 +1,12 @@
 package com.minis.core;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.lang.reflect.*;
 import java.util.concurrent.ConcurrentHashMap;
+
+import com.minis.core.SerializableTypeWrapper.FieldTypeProvider;
+import com.minis.core.SerializableTypeWrapper.MethodParameterTypeProvider;
+import com.minis.core.SerializableTypeWrapper.TypeProvider;
 
 public class ResolvableType implements Serializable {
 
@@ -14,7 +16,7 @@ public class ResolvableType implements Serializable {
 
     private static final ConcurrentHashMap<ResolvableType, ResolvableType> cache = new ConcurrentHashMap<>(256);
     private final Type type;
-    private FieldTypeProvider typeProvider;
+    private TypeProvider typeProvider;
 
     private Class<?> resolved;
 
@@ -31,7 +33,7 @@ public class ResolvableType implements Serializable {
         this.type = this.resolved;
     }
 
-    private ResolvableType(Type type, FieldTypeProvider typeProvider, VariableResolver variableResolver) {
+    private ResolvableType(Type type, TypeProvider typeProvider, VariableResolver variableResolver) {
         this.type = type;
         this.typeProvider = typeProvider;
         this.variableResolver = variableResolver;
@@ -70,7 +72,7 @@ public class ResolvableType implements Serializable {
     }
 
     static ResolvableType forType(
-            Type type, FieldTypeProvider typeProvider, VariableResolver variableResolver) {
+            Type type, TypeProvider typeProvider, VariableResolver variableResolver) {
 
         if (type == null && typeProvider != null) {
             type = typeProvider.getType();
@@ -254,6 +256,15 @@ public class ResolvableType implements Serializable {
         return bounds[0];
     }
 
+    public static ResolvableType forMethodParameter(MethodParameter methodParameter) {
+        return forMethodParameter(methodParameter, (Type) null);
+    }
+
+    static ResolvableType forMethodParameter(
+            MethodParameter methodParameter, Type targetType) {
+        ResolvableType owner = forType(methodParameter.getContainingClass()).as(methodParameter.getDeclaringClass());
+        return forType(targetType, new MethodParameterTypeProvider(methodParameter), owner.asVariableResolver());
+    }
 
     interface VariableResolver extends Serializable {
 
@@ -307,38 +318,5 @@ public class ResolvableType implements Serializable {
         return ((this.type instanceof Class<?> clazz && clazz.isArray()) ||
                 this.type instanceof GenericArrayType || resolveType().isArray());
     }
-
-    static class FieldTypeProvider {
-
-        private final String fieldName;
-
-        private final Class<?> declaringClass;
-
-        private transient Field field;
-
-        public FieldTypeProvider(Field field) {
-            this.fieldName = field.getName();
-            this.declaringClass = field.getDeclaringClass();
-            this.field = field;
-        }
-
-        public Type getType() {
-            return this.field.getGenericType();
-        }
-
-        public Object getSource() {
-            return this.field;
-        }
-
-        private void readObject(ObjectInputStream inputStream) throws IOException, ClassNotFoundException {
-            inputStream.defaultReadObject();
-            try {
-                this.field = this.declaringClass.getDeclaredField(this.fieldName);
-            } catch (Throwable ex) {
-                throw new IllegalStateException("Could not find original class structure", ex);
-            }
-        }
-    }
-
 
 }

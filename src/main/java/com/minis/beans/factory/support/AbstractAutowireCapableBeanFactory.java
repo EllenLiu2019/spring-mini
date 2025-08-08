@@ -2,6 +2,7 @@ package com.minis.beans.factory.support;
 
 import com.minis.beans.*;
 import com.minis.beans.factory.BeanFactoryAware;
+import com.minis.beans.factory.InitializingBean;
 import com.minis.beans.factory.config.*;
 import com.minis.utils.ClassUtils;
 import com.minis.utils.ReflectionUtils;
@@ -252,9 +253,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
         Object singleton = applyBeanPostProcessorsBeforeInitialization(bean, beanName);
 
-        if (bd.getInitMethodName() != null) {
-            invokeInitMethod(bd, singleton);
-        }
+        invokeInitMethod(beanName, bd, singleton);
 
         singleton = applyBeanPostProcessorsAfterInitialization(singleton, beanName);
 
@@ -267,7 +266,13 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         }
     }
 
-    void invokeInitMethod(BeanDefinition beanDef, Object singleton) {
+    void invokeInitMethod(String beanName, BeanDefinition beanDef, Object singleton) {
+        boolean isInitializingBean = (singleton instanceof InitializingBean);
+        if (isInitializingBean) {
+            log.trace("Invoking afterPropertiesSet() on bean with name '" + beanName + "'");
+            ((InitializingBean) singleton).afterPropertiesSet();
+        }
+
         Class<?> clazz = singleton.getClass();
         String initMethodName = beanDef.getInitMethodName();
         if (initMethodName != null && !initMethodName.isEmpty()) {

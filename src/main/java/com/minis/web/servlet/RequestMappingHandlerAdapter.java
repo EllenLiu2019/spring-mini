@@ -20,10 +20,10 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
     private ApplicationContext webApplicationContext;
 
     @Autowired
-    private WebBindingInitializer webBindingInitializer;
+    private WebBindingInitializer initializer;
 
     @Autowired
-    private HttpMessageConverter defaultHttpMessageConverter;
+    private HttpMessageConverter converter;
 
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -35,46 +35,8 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Application
     }
 
     private void invokeHandlerMethod(HttpServletRequest request, HttpServletResponse response, HandlerMethod handler) throws Exception {
-        Parameter[] methodParameters = handler.getMethod().getParameters();
-
-        boolean isRequestParam = false;
-        List<Object> methodsServletParmaObjs = new ArrayList<>();
-
-        List<Object> methodParamObjList = new ArrayList<>();
-        List<String> methodParamObjNameList = new ArrayList<>();
-        Object[] methodParamObjs = new Object[methodParameters.length];
-        for (Parameter methodParameter : methodParameters) {
-            if (methodParameter.getType() == HttpServletRequest.class || methodParameter.getType() == HttpServletResponse.class) {
-                isRequestParam = true;
-                methodsServletParmaObjs.add(methodParameter.getType() == HttpServletRequest.class ? request : response);
-            } else {
-                Object methodParamObj = methodParameter.getType().getConstructor().newInstance();
-                methodParamObjList.add(methodParamObj);
-                methodParamObjNameList.add(methodParameter.getName());
-            }
-        }
-        if (isRequestParam) {
-            methodParamObjs = methodsServletParmaObjs.toArray();
-        } else if (!methodParamObjList.isEmpty()) {
-            WebDataBinder wdb = new WebDataBinderFactory().createBinder(request, methodParamObjList, methodParamObjNameList);
-            webBindingInitializer.registerBinder(wdb);
-            wdb.bind(request);
-            methodParamObjs = methodParamObjList.toArray();
-        }
-
-        Method invocableMethod = handler.getMethod();
-        Object returnObj = invocableMethod.invoke(handler.getBean(), methodParamObjs);
-        Class<?> returnType = invocableMethod.getReturnType();
-
-        if (invocableMethod.isAnnotationPresent(ResponseBody.class)) {
-            this.defaultHttpMessageConverter.write(returnObj, response);
-        } else if (returnType == void.class) {
-            // ignore
-        } else if (returnType == String.class) {
-            response.getWriter().write((String) returnObj);
-        } else {
-            this.defaultHttpMessageConverter.write(returnObj, response);
-        }
+        InvocableHandlerMethod invocableMethod = new InvocableHandlerMethod(handler, this.initializer, this.converter);
+        invocableMethod.invokeAndHandle(request, response);
     }
 
     @Override

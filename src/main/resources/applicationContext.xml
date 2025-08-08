@@ -20,7 +20,7 @@
         <property type="com.minis.web.bind.support.WebBindingInitializer" name="webBindingInitializer" ref="webBindingInitializer"/>
     </bean>
 
-    <bean id="webBindingInitializer" class="com.minis.test.mvc.DateInitializer"/>
+    <bean id="webBindingInitializer" class="com.minis.app.converter.DateInitializer"/>
 
     <bean id="messageConverter" class="com.minis.web.converter.DefaultHttpMessageConverter">
         <property type="com.minis.utils.ObjectMapper" name="objectMapper" ref="objectMapper"/>

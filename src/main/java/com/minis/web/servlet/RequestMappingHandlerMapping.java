@@ -1,6 +1,7 @@
 package com.minis.web.servlet;
 
 import com.minis.beans.BeansException;
+import com.minis.beans.factory.InitializingBean;
 import com.minis.context.ApplicationContext;
 import com.minis.context.ApplicationContextAware;
 import com.minis.web.bind.annotation.RequestMapping;
@@ -8,12 +9,17 @@ import jakarta.servlet.http.HttpServletRequest;
 
 import java.lang.reflect.Method;
 
-public class RequestMappingHandlerMapping implements HandlerMapping, ApplicationContextAware {
+public class RequestMappingHandlerMapping implements HandlerMapping, ApplicationContextAware, InitializingBean {
     private MappingRegistry mappingRegistry;
     private ApplicationContext applicationContext;
 
     public RequestMappingHandlerMapping() {
         this.mappingRegistry = new MappingRegistry();
+    }
+
+    @Override
+    public void afterPropertiesSet() {
+        this.registerMapping();
     }
 
     protected void registerMapping() {
@@ -22,7 +28,7 @@ public class RequestMappingHandlerMapping implements HandlerMapping, Application
 
         String[] controllerNames = applicationContext.getBeanDefinitionNames();
         for (String controllerName : controllerNames) {
-            //TODO: getBean from applicationContext,
+            // getBean from applicationContext,
             // find all methods with @RequestMapping
             // build up mapping for each url->beanInstance & url->method
             try {
@@ -37,7 +43,8 @@ public class RequestMappingHandlerMapping implements HandlerMapping, Application
                     String url = method.getAnnotation(RequestMapping.class).value();
                     this.mappingRegistry.getUrlMappingNames().add(url);
                     this.mappingRegistry.getMappingObjs().put(url, beanInstance);
-                    this.mappingRegistry.getMappingMethods().put(url, method);
+                    HandlerMethod handlerMethod = new HandlerMethod(beanInstance, method);
+                    this.mappingRegistry.getMappingMethods().put(url, handlerMethod);
                 }
             }
         }
@@ -45,16 +52,13 @@ public class RequestMappingHandlerMapping implements HandlerMapping, Application
 
     @Override
     public HandlerMethod getHandler(HttpServletRequest request) {
-        // TODO: 通过 request 中的 path 获取 url 对应的 beanInstance & method
+        // 通过 request 中的 path 获取 url 对应的 beanInstance & method
         //  build up HandlerMethod which is the "request-handler"
-        registerMapping();
         String servletPath = request.getServletPath();
         if (!mappingRegistry.getUrlMappingNames().contains(servletPath)) {
             return null;
         }
-        Object beanInstance = mappingRegistry.getMappingObjs().get(servletPath);
-        Method method = mappingRegistry.getMappingMethods().get(servletPath);
-        return new HandlerMethod(beanInstance, method);
+        return mappingRegistry.getMappingMethods().get(servletPath);
     }
 
     @Override

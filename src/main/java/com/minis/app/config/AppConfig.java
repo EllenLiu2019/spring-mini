@@ -5,7 +5,7 @@ import com.minis.aop.springframework.aop.support.NameMatchMethodPointcut;
 import com.minis.beans.factory.annotation.Value;
 import com.minis.context.annotation.Bean;
 import com.minis.context.annotation.Configuration;
-import com.minis.test.mvc.DateInitializer;
+import com.minis.app.converter.DateInitializer;
 import com.minis.web.bind.support.WebBindingInitializer;
 import com.minis.web.servlet.DispatcherServlet;
 

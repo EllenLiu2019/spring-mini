@@ -1,13 +1,28 @@
 package com.minis.web.bind.support;
 
+import com.minis.core.convert.support.DefaultConversionService;
 import com.minis.web.bind.WebDataBinder;
 import jakarta.servlet.http.HttpServletRequest;
 
-import java.util.List;
 
 public class WebDataBinderFactory {
-    public WebDataBinder createBinder(HttpServletRequest request, List<Object> targets, List<String> objectNames) {
-        return new WebDataBinder(targets, objectNames);
+
+    private WebBindingInitializer initializer;
+
+    public WebDataBinderFactory(WebBindingInitializer initializer) {
+        this.initializer = initializer;
+    }
+    public WebDataBinder createBinder(HttpServletRequest request, Object target, String objectName) {
+        return createBinderInternal(target, objectName);
+    }
+
+    private WebDataBinder createBinderInternal(Object target, String objectName) {
+        WebDataBinder dataBinder = new WebDataBinder(target, objectName);
+        dataBinder.setConversionService(new DefaultConversionService());
+        if (this.initializer != null) {
+            this.initializer.initBinder(dataBinder);
+        }
+        return dataBinder;
     }
 
 }

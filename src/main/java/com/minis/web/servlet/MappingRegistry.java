@@ -14,5 +14,5 @@ import java.util.Map;
 public class MappingRegistry {
     private List<String> urlMappingNames = new ArrayList<>();
     private Map<String, Object> mappingObjs = new HashMap<>();
-    private Map<String, Method> mappingMethods = new HashMap<>();
+    private Map<String, HandlerMethod> mappingMethods = new HashMap<>();
 }

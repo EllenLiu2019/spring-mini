@@ -107,4 +107,10 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
         return getCustomEditor(requiredTypeToUse);
     }
 
+    protected void copyCustomEditorsTo(PropertyEditorRegistry target) {
+        if (this.customEditors != null) {
+            this.customEditors.forEach(target::registerCustomEditor);
+        }
+    }
+
 }
